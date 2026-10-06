@@ -1,0 +1,3029 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sarana - Portal Operasional Terpadu</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+              950: '#0f172a'
+            }
+          },
+          boxShadow: {
+            'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03)',
+            'card': '0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.04)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .bg-grid-subtle {
+      background-image: radial-gradient(rgba(37, 99, 235, 0.06) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+
+<body
+  class="min-h-screen bg-slate-50/70 text-slate-800 antialiased selection:bg-brand-100 selection:text-brand-800 bg-grid-subtle flex flex-col justify-between">
+
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+
+        <!-- Left: Wordmark Logo and Primary Modules Navigation -->
+        <div class="flex items-center gap-6">
+          <a href="javascript:void(0)" onclick="switchPage('sarana-persetujuan')" class="flex items-center group py-1">
+            <span
+              class="text-2xl font-extrabold tracking-tight text-slate-900 hover:text-brand-600 transition-colors select-none">sarana</span>
+          </a>
+
+          <!-- Main Module Navigation Pills (Desktop) -->
+          <nav class="hidden md:flex items-center gap-1.5 pl-4 border-l border-slate-200">
+
+            <!-- Sarana Dropdown (Peminjaman, Persetujuan, Armada) -->
+            <div class="relative">
+              <button id="nav-sarana-btn" onclick="toggleSaranaDropdown()"
+                class="nav-item flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-150 bg-brand-50 text-brand-700 shadow-2xs">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0">
+                  </path>
+                </svg>
+                <span>Sarana</span>
+                <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+
+              <!-- Dropdown Items for Sarana -->
+              <div id="sarana-dropdown"
+                class="absolute left-0 mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 hidden z-40">
+                <button onclick="switchPage('sarana-peminjaman')"
+                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <span>Peminjaman</span>
+                </button>
+                <button onclick="switchPage('sarana-persetujuan')"
+                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>Persetujuan</span>
+                </button>
+                <button onclick="switchPage('sarana-armada')"
+                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 17a2 2 0 11-4 0 2 2 0 014 0zM9 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10"></path>
+                  </svg>
+                  <span>Armada</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Permisi Dropdown (Permohonan, Persetujuan) -->
+            <div class="relative">
+              <button id="nav-permisi-btn" onclick="togglePermisiDropdown()"
+                class="nav-item flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all duration-150">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                  </path>
+                </svg>
+                <span>Permisi</span>
+                <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+
+              <div id="permisi-dropdown"
+                class="absolute left-0 mt-1.5 w-44 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 hidden z-40">
+                <button onclick="switchPage('permisi-permohonan')"
+                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                  </svg>
+                  <span>Permohonan</span>
+                </button>
+                <button onclick="switchPage('permisi-persetujuan')"
+                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>Persetujuan</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Asmara Dropdown (Riwayat Surat Saya, Semua Surat Keluar) -->
+            <div class="relative">
+              <button id="nav-asmara-btn" onclick="toggleAsmaraDropdown()"
+                class="nav-item flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all duration-150">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                  </path>
+                </svg>
+                <span>Asmara</span>
+                <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+
+              <div id="asmara-dropdown"
+                class="absolute left-0 mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 hidden z-40">
+                <button onclick="switchPage('asmara-saya')"
+                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207">
+                    </path>
+                  </svg>
+                  <span>Riwayat Surat Saya</span>
+                </button>
+                <button onclick="switchPage('asmara-semua')"
+                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                    </path>
+                  </svg>
+                  <span>Semua Surat Keluar</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Bon ATK Dropdown (Bon Saya, Persetujuan Admin, Master Barang) -->
+            <div class="relative">
+              <button id="nav-bon-atk-btn" onclick="toggleBonAtkDropdown()"
+                class="nav-item flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all duration-150">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+                <span>Bon ATK</span>
+                <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+
+              <div id="bon-atk-dropdown"
+                class="absolute left-0 mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 hidden z-40">
+                <button onclick="switchPage('bon-atk-saya')"
+                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                  </svg>
+                  <span>Bon Saya</span>
+                </button>
+                <button onclick="switchPage('bon-atk-persetujuan')"
+                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>Persetujuan Admin</span>
+                </button>
+                <button onclick="switchPage('bon-atk-master')"
+                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7M4 7h16M4 7l2-4h12l2 4M9 11h6"></path>
+                  </svg>
+                  <span>Master Barang</span>
+                </button>
+              </div>
+            </div>
+          </nav>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Notification Bell with Badge -->
+          <button onclick="showToast('Ada 9 permohonan peminjaman menunggu verifikasi', 'info')"
+            class="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+              </path>
+            </svg>
+            <span
+              class="absolute top-1 right-1 px-1.5 py-0.5 text-[9px] font-black bg-rose-500 text-white rounded-full ring-2 ring-white">9</span>
+          </button>
+
+          <!-- Settings Button -->
+          <button onclick="showToast('Pengaturan preferensi akun Anda', 'info')"
+            class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition hidden sm:inline-flex">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+              </path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </button>
+
+          <!-- User Info Pill -->
+          <div class="flex items-center gap-2.5 pl-2 sm:border-l sm:border-slate-200">
+            <div
+              class="h-9 w-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-xs border border-slate-700">
+              AD
+            </div>
+            <div class="hidden lg:flex flex-col text-left">
+              <span class="text-xs font-bold text-slate-800 leading-tight">Administrator</span>
+              <span class="text-[11px] text-slate-400 font-medium">NIP: 123456789</span>
+            </div>
+          </div>
+
+          <!-- Redesigned Modern Logout Button -->
+          <button onclick="handleLogout()"
+            class="group flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50/60 hover:bg-rose-500 text-rose-700 hover:text-white text-xs font-semibold transition-all duration-200 shadow-2xs ml-1">
+            <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            <span class="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Sub-navigation Bar -->
+    <div class="flex md:hidden px-4 py-2 border-t border-slate-200 bg-white/80 overflow-x-auto gap-2">
+      <button onclick="switchPage('sarana-persetujuan')"
+        class="px-3 py-1 rounded-lg text-xs font-semibold bg-brand-50 text-brand-700 whitespace-nowrap">Persetujuan
+        Sarana</button>
+      <button onclick="switchPage('sarana-peminjaman')"
+        class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 whitespace-nowrap">Peminjaman</button>
+      <button onclick="switchPage('sarana-armada')"
+        class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 whitespace-nowrap">Armada</button>
+      <button onclick="switchPage('permisi-permohonan')"
+        class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 whitespace-nowrap">Permohonan Izin</button>
+      <button onclick="switchPage('permisi-persetujuan')"
+        class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 whitespace-nowrap">Persetujuan Izin</button>
+      <button onclick="switchPage('asmara-saya')"
+        class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 whitespace-nowrap">Surat Saya</button>
+      <button onclick="switchPage('asmara-semua')"
+        class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 whitespace-nowrap">Semua Surat</button>
+      <button onclick="switchPage('bon-atk-saya')"
+        class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 whitespace-nowrap">Bon Saya</button>
+      <button onclick="switchPage('bon-atk-persetujuan')"
+        class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 whitespace-nowrap">Persetujuan ATK</button>
+      <button onclick="switchPage('bon-atk-master')"
+        class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 whitespace-nowrap">Master Barang</button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 1: SARANA SUBMENU 2: DASHBOARD PERSETUJUAN                         -->
+    <!-- ========================================================================= -->
+    <section id="page-sarana-persetujuan" class="page-section">
+      <!-- Header Area: Fixed Overlap Bug with Distinct Flow and Leading -->
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-normal">
+            Dashboard Persetujuan Peminjaman
+          </h1>
+          <p class="text-slate-500 text-sm mt-1 leading-normal">Real-time analytics and lending approvals manajemen
+            armada dinas.</p>
+        </div>
+
+        <div class="flex items-center gap-2.5 self-start sm:self-auto">
+          <button onclick="openBookingModal()"
+            class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs shadow-md shadow-brand-600/25 hover:shadow-brand-600/35 transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>Pengajuan</span>
+          </button>
+
+          <button onclick="openExportModal()"
+            class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs shadow-2xs hover:border-slate-300 transition flex items-center gap-2">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            <span>Export</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 Modern Metric KPI Cards (No text overlapping) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+        <!-- Card 1: Total Peminjaman -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Peminjaman</p>
+            <p class="text-3xl font-extrabold text-slate-900 mt-2">413</p>
+            <p class="text-[11px] text-slate-400 mt-1">Sesuai filter tabel</p>
+          </div>
+          <div
+            class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 border border-brand-100">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0">
+              </path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Card 2: Top Vehicle -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card flex items-start justify-between">
+          <div class="min-w-0 flex-1 pr-2">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Top Vehicle</p>
+            <h4 class="text-base font-bold text-slate-900 mt-2 truncate leading-snug">All New Ertiga A/T</h4>
+            <div class="flex items-center gap-1.5 mt-2">
+              <span
+                class="inline-flex px-2 py-0.5 text-[10px] font-bold rounded-md bg-brand-50 text-brand-700 border border-brand-100">N
+                1619 AP</span>
+              <span class="text-xs text-slate-500 font-medium">&bull; 120 trips</span>
+            </div>
+          </div>
+          <div
+            class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100 mt-1">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Card 3: Top Seksi -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card flex items-start justify-between">
+          <div class="min-w-0 flex-1 pr-2">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Top Seksi</p>
+            <h4 class="text-sm font-bold text-slate-900 mt-2 line-clamp-1 leading-snug">Seksi Pemeriksaan & Penilaian
+            </h4>
+            <p class="text-xs text-slate-500 font-medium mt-2">135 peminjaman armada</p>
+          </div>
+          <div
+            class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100 mt-1">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+              </path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Card 4: Top Pegawai -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card flex items-start justify-between">
+          <div class="min-w-0 flex-1 pr-2">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Top Pegawai</p>
+            <h4 class="text-base font-bold text-slate-900 mt-2 truncate leading-snug">Ego Nuzulul Ramadhana</h4>
+            <p class="text-xs text-slate-500 font-medium mt-2">34 kali perjalanan dinas</p>
+          </div>
+          <div
+            class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100 mt-1">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Filter Bar for Lending Management -->
+      <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card mb-6">
+        <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-100">
+          <div class="flex items-center gap-2.5">
+            <h3 class="text-sm font-bold text-slate-900">Manajemen Peminjaman</h3>
+            <span
+              class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+              9 Menunggu
+            </span>
+          </div>
+          <button onclick="showToast('Filter pencarian direset ke kondisi default', 'info')"
+            class="text-xs font-semibold text-brand-600 hover:text-brand-700 hover:underline">
+            Reset Filter
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
+          <div class="sm:col-span-4">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+              <input type="text" placeholder="Cari Pegawai, Mobil, atau Kota..."
+                class="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 hover:bg-slate-50/80 focus:bg-white text-xs font-medium rounded-xl border border-slate-200 focus:border-brand-600 outline-none transition" />
+            </div>
+          </div>
+          <div class="sm:col-span-3">
+            <select
+              class="w-full px-3.5 py-2.5 bg-slate-50 text-xs font-medium rounded-xl border border-slate-200 focus:border-brand-600 outline-none transition">
+              <option>Semua Status</option>
+              <option>Proses (Menunggu)</option>
+              <option>Disetujui</option>
+              <option>Ditolak</option>
+              <option>Selesai</option>
+            </select>
+          </div>
+          <div class="sm:col-span-5 grid grid-cols-2 gap-2.5">
+            <input type="date" value="2026-09-08"
+              class="w-full px-3 py-2 bg-slate-50 text-xs font-medium rounded-xl border border-slate-200 outline-none text-slate-600" />
+            <input type="date" value="2026-09-16"
+              class="w-full px-3 py-2 bg-slate-50 text-xs font-medium rounded-xl border border-slate-200 outline-none text-slate-600" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Vehicle Lending Approval Table -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 shadow-card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                <th class="py-3.5 px-5">Pegawai</th>
+                <th class="py-3.5 px-4">Mobil</th>
+                <th class="py-3.5 px-4">Kota Tujuan</th>
+                <th class="py-3.5 px-4">Keperluan</th>
+                <th class="py-3.5 px-4 whitespace-nowrap">Mulai</th>
+                <th class="py-3.5 px-4 whitespace-nowrap">Selesai</th>
+                <th class="py-3.5 px-4 text-center">Status</th>
+                <th class="py-3.5 px-5 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+
+              <!-- Row 1 -->
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <td class="py-4 px-5">
+                  <p class="font-bold text-slate-900 leading-snug">Muhammad Fahmi Hidayat</p>
+                  <p class="text-[11px] text-slate-400 font-medium mt-2 leading-tight">Seksi Pemeriksaan, Penilaian, dan
+                    Penagihan</p>
+                </td>
+                <td class="py-4 px-4 whitespace-nowrap">
+                  <p class="font-bold text-slate-800 leading-snug">Xpander</p>
+                  <div class="mt-2">
+                    <span
+                      class="inline-flex px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 font-mono">
+                      N 1443 AP
+                    </span>
+                  </div>
+                </td>
+                <td class="py-4 px-4 text-slate-700 font-semibold whitespace-nowrap">Kota Malang</td>
+                <td class="py-4 px-4 text-slate-600 max-w-xs truncate">Penyampaian Surat Paksa Pajak</td>
+                <td class="py-4 px-4 text-slate-500 whitespace-nowrap">08 Sep 2026</td>
+                <td class="py-4 px-4 text-slate-500 whitespace-nowrap">08 Sep 2026</td>
+                <td class="py-4 px-4 text-center whitespace-nowrap">
+                  <span
+                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    Proses
+                  </span>
+                </td>
+                <td class="py-4 px-5 text-center whitespace-nowrap">
+                  <div class="inline-flex items-center justify-center gap-1.5">
+                    <button onclick="openApproveModal('Muhammad Fahmi Hidayat', 'Xpander (N 1443 AP)')"
+                      title="Setujui Peminjaman"
+                      class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg border border-transparent hover:border-emerald-200 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7">
+                        </path>
+                      </svg>
+                    </button>
+                    <button onclick="openRejectModal('Muhammad Fahmi Hidayat')" title="Tolak Peminjaman"
+                      class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                          d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                    <button
+                      onclick="openEditBookingModal('Muhammad Fahmi Hidayat', 'Xpander (N 1443 AP)', 'Penyampaian Surat Paksa Pajak', 'Kota Malang', '2026-09-08', '2026-09-08')"
+                      title="Edit Data"
+                      class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg border border-transparent hover:border-amber-200 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                        </path>
+                      </svg>
+                    </button>
+                    <button onclick="openDeleteBookingModal('Muhammad Fahmi Hidayat', 'Xpander')" title="Hapus Data"
+                      class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 2 -->
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <td class="py-4 px-5">
+                  <p class="font-bold text-slate-900 leading-snug">Arizal Yuwana</p>
+                  <p class="text-[11px] text-slate-400 font-medium mt-2 leading-tight">Seksi Pemeriksaan, Penilaian, dan
+                    Penagihan</p>
+                </td>
+                <td class="py-4 px-4 whitespace-nowrap">
+                  <p class="font-bold text-slate-800 leading-snug">All New Ertiga A/T</p>
+                  <div class="mt-2">
+                    <span
+                      class="inline-flex px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 font-mono">
+                      N 1619 AP
+                    </span>
+                  </div>
+                </td>
+                <td class="py-4 px-4 text-slate-700 font-semibold whitespace-nowrap">Kota Kediri</td>
+                <td class="py-4 px-4 text-slate-600 max-w-xs truncate">Penilaian Lapangan dalam rangka Pemeriksaan
+                  Khusus</td>
+                <td class="py-4 px-4 text-slate-500 whitespace-nowrap">15 Sep 2026</td>
+                <td class="py-4 px-4 text-slate-500 whitespace-nowrap">16 Sep 2026</td>
+                <td class="py-4 px-4 text-center whitespace-nowrap">
+                  <span
+                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    Proses
+                  </span>
+                </td>
+                <td class="py-4 px-5 text-center whitespace-nowrap">
+                  <div class="inline-flex items-center justify-center gap-1.5">
+                    <button onclick="openApproveModal('Arizal Yuwana', 'All New Ertiga A/T (N 1619 AP)')"
+                      title="Setujui Peminjaman"
+                      class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg border border-transparent hover:border-emerald-200 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7">
+                        </path>
+                      </svg>
+                    </button>
+                    <button onclick="openRejectModal('Arizal Yuwana')" title="Tolak Peminjaman"
+                      class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                          d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                    <button
+                      onclick="openEditBookingModal('Arizal Yuwana', 'All New Ertiga A/T', 'Penilaian Lapangan', 'Kota Kediri', '2026-09-15', '2026-09-16')"
+                      title="Edit Data"
+                      class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg border border-transparent hover:border-amber-200 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                        </path>
+                      </svg>
+                    </button>
+                    <button onclick="openDeleteBookingModal('Arizal Yuwana', 'All New Ertiga A/T')" title="Hapus Data"
+                      class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 1: SARANA SUBMENU 1: FORM PEMINJAMAN KENDARAAN (USER VIEW)         -->
+    <!-- ========================================================================= -->
+    <section id="page-sarana-peminjaman" class="page-section hidden">
+      <div class="mb-8">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">Peminjaman Kendaraan
+        </h1>
+        <p class="text-slate-500 text-sm mt-1.5">Pantau status pengajuan peminjaman kendaraan armada dinas Anda.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left Column: CTA Card & Overview -->
+        <div class="lg:col-span-4 space-y-6">
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-card">
+            <h3 class="text-base font-bold text-slate-900">Buat Peminjaman</h3>
+            <p class="text-slate-500 text-xs mt-2 leading-relaxed">Ajukan peminjaman armada dinas untuk keperluan dinas
+              luar kantor secara cepat dan real-time.</p>
+            <button onclick="openBookingModal()"
+              class="w-full mt-5 py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs shadow-md shadow-brand-600/25 flex items-center justify-center gap-2 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span>Mulai Pengajuan Baru</span>
+            </button>
+          </div>
+
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-card">
+            <h3 class="text-sm font-bold text-slate-900 mb-4 pb-3 border-b border-slate-100">Overview Status Peminjaman
+            </h3>
+            <div class="space-y-3.5 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="flex items-center gap-2 font-medium text-slate-600">
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Menunggu Persetujuan
+                </span>
+                <strong class="font-bold text-slate-800">0</strong>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="flex items-center gap-2 font-medium text-slate-600">
+                  <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span> Disetujui (Aktif)
+                </span>
+                <strong class="font-bold text-slate-800">0</strong>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="flex items-center gap-2 font-medium text-slate-600">
+                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Ditolak / Dibatalkan
+                </span>
+                <strong class="font-bold text-slate-800">0</strong>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="flex items-center gap-2 font-medium text-slate-600">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Selesai
+                </span>
+                <strong class="font-bold text-slate-800">6</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: History List -->
+        <div class="lg:col-span-8">
+          <div class="bg-white rounded-3xl border border-slate-200/90 shadow-card overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h3 class="text-base font-bold text-slate-900">Riwayat Peminjaman</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Daftar penggunaan armada Anda sebelumnya</p>
+              </div>
+              <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+            </div>
+
+            <div class="divide-y divide-slate-100 text-xs">
+              <div class="p-5 flex items-center justify-between hover:bg-slate-50/70 transition">
+                <div class="flex items-center gap-3.5">
+                  <div
+                    class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-slate-800">All New Ertiga A/T</h4>
+                    <p class="text-slate-400 text-[11px] mt-0.5">REQ-2026-0316 &bull; Selesai 13 Jul 2026</p>
+                  </div>
+                </div>
+                <button onclick="openCetakModal('Peminjaman Armada REQ-2026-0316', 'All New Ertiga A/T (N 1619 AP)')"
+                  class="px-3 py-1 rounded-xl text-[11px] font-bold border border-brand-200 text-brand-700 bg-brand-50/50 hover:bg-brand-100 transition flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                    </path>
+                  </svg>
+                  <span>Cetak Bukti</span>
+                </button>
+              </div>
+
+              <div class="p-5 flex items-center justify-between hover:bg-slate-50/70 transition">
+                <div class="flex items-center gap-3.5">
+                  <div
+                    class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-slate-800">Strada Triton Exceed</h4>
+                    <p class="text-slate-400 text-[11px] mt-0.5">REQ-2025-0003 &bull; Selesai 20 Mar 2025</p>
+                  </div>
+                </div>
+                <button onclick="openCetakModal('Peminjaman Armada REQ-2025-0003', 'Strada Triton Exceed (N 1120 AP)')"
+                  class="px-3 py-1 rounded-xl text-[11px] font-bold border border-brand-200 text-brand-700 bg-brand-50/50 hover:bg-brand-100 transition flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                    </path>
+                  </svg>
+                  <span>Cetak Bukti</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 1: SARANA SUBMENU 3: MANAJEMEN ARMADA KENDARAAN                    -->
+    <!-- ========================================================================= -->
+    <section id="page-sarana-armada" class="page-section hidden">
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">Manajemen Armada
+          </h1>
+          <p class="text-slate-500 text-sm mt-1.5">Kelola status ketersediaan, perbaikan, dan inventaris kendaraan dinas
+            operasional.</p>
+        </div>
+
+        <button onclick="openAddVehicleModal()"
+          class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs shadow-md shadow-brand-600/25 flex items-center gap-2 self-start sm:self-auto">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Tambah Mobil</span>
+        </button>
+      </div>
+
+      <!-- 4 Stat Cards for Fleet -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Armada</p>
+          <p class="text-3xl font-extrabold text-slate-900 mt-2">6</p>
+          <p class="text-[11px] text-slate-400 mt-1">Kendaraan terdaftar</p>
+        </div>
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tersedia</p>
+          <p class="text-3xl font-extrabold text-emerald-600 mt-2">6</p>
+          <p class="text-[11px] text-slate-400 mt-1">Siap operasional</p>
+        </div>
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Maintenance</p>
+          <p class="text-3xl font-extrabold text-amber-600 mt-2">0</p>
+          <p class="text-[11px] text-slate-400 mt-1">Dalam perbaikan</p>
+        </div>
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Utilisasi</p>
+          <p class="text-3xl font-extrabold text-brand-600 mt-2">100%</p>
+          <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+            <div class="bg-brand-600 h-full rounded-full w-full"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fleet Grid Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+        <!-- Fleet Card 1 -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card flex flex-col justify-between">
+          <div>
+            <div
+              class="w-full h-36 bg-gradient-to-tr from-slate-100 to-slate-50 rounded-2xl flex items-center justify-center p-3 mb-4 relative overflow-hidden border border-slate-100">
+              <span
+                class="absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Tersedia
+              </span>
+              <svg class="w-16 h-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0">
+                </path>
+              </svg>
+            </div>
+            <h4 class="font-bold text-slate-800 text-sm">All New Ertiga A/T</h4>
+            <div class="mt-2">
+              <span
+                class="inline-flex px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 font-mono">
+                N 1619 AP
+              </span>
+            </div>
+          </div>
+          <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="font-bold text-emerald-600">Aktif</span>
+            <button onclick="toggleCarStatus(this)"
+              class="w-9 h-5 bg-emerald-500 rounded-full p-0.5 transition flex items-center">
+              <div class="w-4 h-4 bg-white rounded-full shadow-md transform translate-x-4 transition"></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Fleet Card 2 -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card flex flex-col justify-between">
+          <div>
+            <div
+              class="w-full h-36 bg-gradient-to-tr from-slate-100 to-slate-50 rounded-2xl flex items-center justify-center p-3 mb-4 relative overflow-hidden border border-slate-100">
+              <span
+                class="absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Tersedia
+              </span>
+              <svg class="w-16 h-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0">
+                </path>
+              </svg>
+            </div>
+            <h4 class="font-bold text-slate-800 text-sm">New Kijang Innova M/T</h4>
+            <div class="mt-2">
+              <span
+                class="inline-flex px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 font-mono">
+                N 1720 AP
+              </span>
+            </div>
+          </div>
+          <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="font-bold text-emerald-600">Aktif</span>
+            <button onclick="toggleCarStatus(this)"
+              class="w-9 h-5 bg-emerald-500 rounded-full p-0.5 transition flex items-center">
+              <div class="w-4 h-4 bg-white rounded-full shadow-md transform translate-x-4 transition"></div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 2: PERMISI SUBMENU 1: PERMOHONAN IZIN PEGAWAI                      -->
+    <!-- ========================================================================= -->
+    <section id="page-permisi-permohonan" class="page-section hidden">
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">Permohonan Izin
+            Keluar</h1>
+          <p class="text-slate-500 text-sm mt-1.5">Form pengajuan dan riwayat permohonan perizinan keluar jam kantor.
+          </p>
+        </div>
+
+        <button onclick="openPermisiModal()"
+          class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs shadow-md shadow-brand-600/25 transition flex items-center gap-2 self-start sm:self-auto">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Pengajuan Izin</span>
+        </button>
+      </div>
+
+      <!-- 4 Metric Cards for Permisi -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">TOTAL PERMOHONAN</p>
+          <p class="text-3xl font-extrabold text-slate-900 mt-2">18</p>
+        </div>
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">PENDING</p>
+          <p class="text-3xl font-extrabold text-amber-600 mt-2">1</p>
+        </div>
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">DISETUJUI</p>
+          <p class="text-3xl font-extrabold text-emerald-600 mt-2">17</p>
+        </div>
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">DITOLAK</p>
+          <p class="text-3xl font-extrabold text-rose-600 mt-2">0</p>
+        </div>
+      </div>
+
+      <!-- Permisi Table -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 shadow-card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                <th class="py-3.5 px-5">Pegawai</th>
+                <th class="py-3.5 px-4">Jenis & Kategori</th>
+                <th class="py-3.5 px-4">Keperluan</th>
+                <th class="py-3.5 px-4 whitespace-nowrap">Mulai & Selesai</th>
+                <th class="py-3.5 px-4 text-center">Status</th>
+                <th class="py-3.5 px-5 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <td class="py-4 px-5">
+                  <p class="font-bold text-slate-900 leading-snug">Dhafin Fuad Mahathir</p>
+                  <p class="text-[11px] text-slate-400 font-medium mt-2 leading-tight">Seksi Penjaminan Kualitas Data
+                    &bull; NIP: 817931806</p>
+                </td>
+                <td class="py-4 px-4">
+                  <p class="font-bold text-slate-800">Lain-lain</p>
+                  <p class="text-[11px] text-slate-400">Permohonan</p>
+                </td>
+                <td class="py-4 px-4 text-slate-700 font-medium">Tes percobaan sistem integrasi</td>
+                <td class="py-4 px-4 text-slate-500 whitespace-nowrap">
+                  <p>08 Sep 2026, 14:37</p>
+                  <p class="text-[11px] text-slate-400 mt-0.5">08 Sep 2026, 15:38</p>
+                </td>
+                <td class="py-4 px-4 text-center whitespace-nowrap">
+                  <span
+                    class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                    Pending
+                  </span>
+                </td>
+                <td class="py-4 px-5 text-center whitespace-nowrap">
+                  <div class="inline-flex items-center justify-center gap-1.5">
+                    <button
+                      onclick="openEditPermisiModal('Lain-lain', 'Permohonan', '2026-09-08T14:37', '2026-09-08T15:38', 'Tes percobaan sistem integrasi')"
+                      class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition border border-transparent hover:border-amber-200"
+                      title="Edit Permohonan">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                        </path>
+                      </svg>
+                    </button>
+                    <button onclick="openCancelPermisiModal('Dhafin Fuad Mahathir', 'Tes percobaan')"
+                      class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition border border-transparent hover:border-rose-200"
+                      title="Batalkan Permohonan">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 2: PERMISI SUBMENU 2: PERSETUJUAN IZIN (ATASAN)                    -->
+    <!-- ========================================================================= -->
+    <section id="page-permisi-persetujuan" class="page-section hidden">
+      <div class="mb-8">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">Persetujuan Izin
+          Bawahan</h1>
+        <p class="text-slate-500 text-sm mt-1.5">Manajemen persetujuan izin keluar kantor pegawai di bawah supervisi
+          Anda.</p>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-200/90 shadow-card overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-900">Daftar Menunggu Persetujuan</h3>
+          <span
+            class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+            1 Menunggu
+          </span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                <th class="py-3.5 px-5">Pegawai</th>
+                <th class="py-3.5 px-4">Kategori</th>
+                <th class="py-3.5 px-4">Keperluan</th>
+                <th class="py-3.5 px-4 whitespace-nowrap">Jadwal Keluar</th>
+                <th class="py-3.5 px-5 text-center">Aksi Verifikasi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <td class="py-4 px-5">
+                  <p class="font-bold text-slate-900 leading-snug">Dhafin Fuad Mahathir</p>
+                  <p class="text-[11px] text-slate-400 font-medium mt-1">NIP: 817931806</p>
+                </td>
+                <td class="py-4 px-4 text-slate-800 font-semibold">Lain-lain</td>
+                <td class="py-4 px-4 text-slate-600 font-medium">Tes percobaan integrasi</td>
+                <td class="py-4 px-4 text-slate-500 whitespace-nowrap">08 Sep 2026 (14:37 - 15:38)</td>
+                <td class="py-4 px-5 text-center whitespace-nowrap">
+                  <div class="inline-flex items-center justify-center gap-2">
+                    <button onclick="openApprovePermisiModal('Dhafin Fuad Mahathir', 'Tes percobaan')"
+                      class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs transition flex items-center gap-1">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7">
+                        </path>
+                      </svg>
+                      <span>Setujui</span>
+                    </button>
+                    <button onclick="openRejectPermisiModal('Dhafin Fuad Mahathir', 'Tes percobaan')"
+                      class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition flex items-center gap-1">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                          d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                      <span>Tolak</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 3: ASMARA SUBMENU 1: RIWAYAT SURAT SAYA                            -->
+    <!-- ========================================================================= -->
+    <section id="page-asmara-saya" class="page-section hidden">
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">Riwayat Surat Saya
+          </h1>
+          <p class="text-slate-500 text-sm mt-1.5">Form pengambilan nomor dinas dan riwayat surat keluar pribadi.</p>
+        </div>
+
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <button onclick="openLetterModal()"
+            class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/25 transition flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>Pengambilan Nomor Surat</span>
+          </button>
+
+          <button onclick="openKaharModal()"
+            class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs shadow-2xs transition flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+              </path>
+            </svg>
+            <span>Nomor Surat Kahar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Asmara Table -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 shadow-card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                <th class="py-3.5 px-5">Nomor Surat</th>
+                <th class="py-3.5 px-4">Perihal</th>
+                <th class="py-3.5 px-4">Tujuan</th>
+                <th class="py-3.5 px-4 whitespace-nowrap">Tanggal</th>
+                <th class="py-3.5 px-4">Konseptor</th>
+                <th class="py-3.5 px-5 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <td class="py-4 px-5 whitespace-nowrap">
+                  <code
+                    class="font-mono font-bold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md border border-brand-100 text-[11px]">
+                    SICT-318/KPP.1209/2026
+                  </code>
+                </td>
+                <td class="py-4 px-4 font-semibold text-slate-800">Permohonan Cuti 1/2 Hari</td>
+                <td class="py-4 px-4 text-slate-600">Kepala Subbagian Umum dan Kepatuhan Internal</td>
+                <td class="py-4 px-4 text-slate-500 whitespace-nowrap">03 Jun 2026</td>
+                <td class="py-4 px-4">
+                  <p class="font-bold text-slate-800">Dhafin Fuad Mahathir</p>
+                  <p class="text-[11px] text-slate-400 mt-1">817931806</p>
+                </td>
+                <td class="py-4 px-5 text-center whitespace-nowrap">
+                  <div class="inline-flex items-center justify-center gap-1.5">
+                    <button
+                      onclick="openEditLetterModal('SICT-318/KPP.1209/2026', 'Permohonan Cuti 1/2 Hari', 'Kepala Subbagian Umum dan Kepatuhan Internal', 'Dhafin Fuad Mahathir')"
+                      class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Edit Surat">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                        </path>
+                      </svg>
+                    </button>
+                    <button onclick="openDeleteLetterModal('SICT-318/KPP.1209/2026', 'Permohonan Cuti 1/2 Hari')"
+                      class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Hapus Surat">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 3: ASMARA SUBMENU 2: SEMUA SURAT KELUAR (INSTANSI)                 -->
+    <!-- ========================================================================= -->
+    <section id="page-asmara-semua" class="page-section hidden">
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">Semua Surat Keluar
+          </h1>
+          <p class="text-slate-500 text-sm mt-1.5">Manajemen dan daftar seluruh surat dinas keluar kantor.</p>
+        </div>
+
+        <button onclick="openKaharModal()"
+          class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs shadow-2xs transition flex items-center gap-1.5 self-start sm:self-auto">
+          <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+            </path>
+          </svg>
+          <span>Pengaturan Surat Kahar</span>
+        </button>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-200/90 shadow-card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                <th class="py-3.5 px-5">Nomor Surat</th>
+                <th class="py-3.5 px-4">Perihal</th>
+                <th class="py-3.5 px-4">Tujuan</th>
+                <th class="py-3.5 px-4 whitespace-nowrap">Tanggal</th>
+                <th class="py-3.5 px-4">Konseptor</th>
+                <th class="py-3.5 px-5 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <td class="py-4 px-5 whitespace-nowrap">
+                  <code
+                    class="font-mono font-bold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md border border-brand-100 text-[11px]">
+                    LAP-2482/KPP.1209/2026
+                  </code>
+                </td>
+                <td class="py-4 px-4 font-semibold text-slate-800">Uraian Penelitian Pengembalian Kelebihan Pembayaran
+                </td>
+                <td class="py-4 px-4 text-slate-600">ADHITAMA SEJAHTERA ABADI</td>
+                <td class="py-4 px-4 text-slate-500 whitespace-nowrap">08 Sep 2026</td>
+                <td class="py-4 px-4">
+                  <p class="font-bold text-slate-800">Wendra Rayudianto</p>
+                  <p class="text-[11px] text-slate-400 mt-1">849440117</p>
+                </td>
+                <td class="py-4 px-5 text-center whitespace-nowrap">
+                  <div class="inline-flex items-center justify-center gap-1.5">
+                    <button
+                      onclick="openCetakModal('Arsip Surat LAP-2482', 'Penelitian Pengembalian Kelebihan Pembayaran')"
+                      class="p-1.5 text-brand-600 hover:bg-brand-50 rounded-lg transition" title="Lihat & Cetak Arsip">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                        </path>
+                      </svg>
+                    </button>
+                    <button
+                      onclick="openEditLetterModal('LAP-2482/KPP.1209/2026', 'Uraian Penelitian Pengembalian Kelebihan Pembayaran', 'ADHITAMA SEJAHTERA ABADI', 'Wendra Rayudianto')"
+                      class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Edit Surat">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                        </path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 4: BON ATK SUBMENU 1: BON SAYA & KATALOG                           -->
+    <!-- ========================================================================= -->
+    <section id="page-bon-atk-saya" class="page-section hidden">
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">Permintaan ATK</h1>
+          <p class="text-slate-500 text-sm mt-1.5">Ajukan permintaan barang ATK baru dan pantau statusnya.</p>
+        </div>
+
+        <button onclick="openKeranjangModal()"
+          class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs shadow-md shadow-brand-600/25 transition flex items-center gap-2.5 self-start sm:self-auto">
+          <span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[11px] font-extrabold"
+            id="cart-counter-badge">2</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+            </path>
+          </svg>
+          <span>Keranjang</span>
+        </button>
+      </div>
+
+      <!-- Bon Orders Table -->
+      <div class="bg-white rounded-3xl border border-slate-200/90 shadow-card overflow-hidden mb-12">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-900">Riwayat Pengajuan Tiket Bon ATK</h3>
+          <span class="text-xs text-slate-400 font-medium">Diperbarui real-time</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                <th class="py-3.5 px-5">Tiket</th>
+                <th class="py-3.5 px-4 whitespace-nowrap">Tanggal</th>
+                <th class="py-3.5 px-4">Keperluan</th>
+                <th class="py-3.5 px-4">Item Permintaan</th>
+                <th class="py-3.5 px-4 text-center">Status</th>
+                <th class="py-3.5 px-5 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <td class="py-4 px-5 whitespace-nowrap">
+                  <code
+                    class="font-mono font-bold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md border border-brand-100 text-[11px]">
+                    BON-202607-00005
+                  </code>
+                </td>
+                <td class="py-4 px-4 text-slate-500 whitespace-nowrap">16 Jul 2026, 10:54</td>
+                <td class="py-4 px-4 font-semibold text-slate-800">Keperluan Seksi PKD</td>
+                <td class="py-4 px-4 text-slate-600">Joyko Gunting SC-828 (1 PCS)</td>
+                <td class="py-4 px-4 text-center whitespace-nowrap">
+                  <span
+                    class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                    Ditolak
+                  </span>
+                </td>
+                <td class="py-4 px-5 text-center whitespace-nowrap">
+                  <button onclick="openCetakModal('Tiket BON-202607-00005', 'Joyko Gunting SC-828 (1 PCS)')"
+                    class="px-3 py-1 rounded-xl border border-slate-200 hover:bg-slate-50 font-semibold text-slate-600 text-xs shadow-2xs inline-flex items-center gap-1.5 transition">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                      </path>
+                    </svg>
+                    <span>Cetak</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section: Katalog Barang ATK -->
+      <div class="mb-6">
+        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Katalog Barang ATK</h2>
+        <p class="text-slate-500 text-xs sm:text-sm mt-1">Cari dan pilih barang yang Anda butuhkan untuk operasional
+          dinas.</p>
+      </div>
+
+      <!-- Grid Katalog ATK (With Stock badge in top right of image) -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+
+        <!-- Card 1 -->
+        <div
+          class="bg-white rounded-3xl p-3.5 border border-slate-200/90 shadow-card hover:shadow-lg transition flex flex-col justify-between">
+          <div>
+            <div
+              class="relative w-full h-28 bg-slate-50 rounded-2xl flex items-center justify-center p-2 mb-3 overflow-hidden border border-slate-100">
+              <span
+                class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/90 backdrop-blur-xs text-brand-700 border border-slate-200 shadow-2xs">
+                Stok: 19 PCS
+              </span>
+              <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                </path>
+              </svg>
+            </div>
+            <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">AMPLOP 90 PAPERLINE</h4>
+          </div>
+          <div class="pt-3 mt-3 border-t border-slate-100 flex items-center gap-1.5">
+            <input type="number" min="1" value="1"
+              class="w-12 px-1.5 py-1.5 bg-slate-50 text-center font-bold text-xs rounded-xl border border-slate-200 outline-none" />
+            <button onclick="addToCart('AMPLOP 90 PAPERLINE', 1)"
+              class="flex-1 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center justify-center shadow-xs transition"
+              title="Tambah ke keranjang">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div
+          class="bg-white rounded-3xl p-3.5 border border-slate-200/90 shadow-card hover:shadow-lg transition flex flex-col justify-between">
+          <div>
+            <div
+              class="relative w-full h-28 bg-slate-50 rounded-2xl flex items-center justify-center p-2 mb-3 overflow-hidden border border-slate-100">
+              <span
+                class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/90 backdrop-blur-xs text-brand-700 border border-slate-200 shadow-2xs">
+                Stok: 524 PCS
+              </span>
+              <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z">
+                </path>
+              </svg>
+            </div>
+            <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">Alkaline Baterai AA 4B+2</h4>
+          </div>
+          <div class="pt-3 mt-3 border-t border-slate-100 flex items-center gap-1.5">
+            <input type="number" min="1" value="1"
+              class="w-12 px-1.5 py-1.5 bg-slate-50 text-center font-bold text-xs rounded-xl border border-slate-200 outline-none" />
+            <button onclick="addToCart('Alkaline Baterai AA 4B+2', 1)"
+              class="flex-1 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center justify-center shadow-xs transition"
+              title="Tambah ke keranjang">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 4: BON ATK SUBMENU 2: PERSETUJUAN ADMIN                            -->
+    <!-- ========================================================================= -->
+    <section id="page-bon-atk-persetujuan" class="page-section hidden">
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">Kelola Persetujuan
+            ATK</h1>
+          <p class="text-slate-500 text-sm mt-1.5">Setujui, tolak, atau tandai penyerahan permintaan barang ATK dinas.
+          </p>
+        </div>
+
+        <button onclick="openExportBonModal()"
+          class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs shadow-md shadow-brand-600/25 transition flex items-center gap-2 self-start sm:self-auto">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          <span>Export Excel</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">MENUNGGU</p>
+          <p class="text-3xl font-extrabold text-amber-600 mt-2">0</p>
+        </div>
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">DISETUJUI</p>
+          <p class="text-3xl font-extrabold text-brand-600 mt-2">0</p>
+        </div>
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">DISERAHKAN</p>
+          <p class="text-3xl font-extrabold text-emerald-600 mt-2">32</p>
+        </div>
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">DITOLAK</p>
+          <p class="text-3xl font-extrabold text-rose-600 mt-2">6</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-200/90 shadow-card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                <th class="py-3.5 px-5">No. Bon</th>
+                <th class="py-3.5 px-4">Pemohon</th>
+                <th class="py-3.5 px-4">Keperluan</th>
+                <th class="py-3.5 px-4">Barang Diminta</th>
+                <th class="py-3.5 px-4 whitespace-nowrap">Tgl.</th>
+                <th class="py-3.5 px-4 text-center">Status</th>
+                <th class="py-3.5 px-5 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <td class="py-4 px-5 whitespace-nowrap">
+                  <code
+                    class="font-mono font-bold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md border border-brand-100 text-[11px]">
+                    BON-202609-00006
+                  </code>
+                </td>
+                <td class="py-4 px-4">
+                  <p class="font-bold text-slate-900 leading-snug">Dzaki Nuzuli Fiqkriazmi</p>
+                  <p class="text-[11px] text-slate-400 mt-1">Seksi Pelayanan</p>
+                </td>
+                <td class="py-4 px-4 text-slate-700 font-medium">keperluan pengarsipan dokumen</td>
+                <td class="py-4 px-4 text-slate-600 font-medium">Map Kantor Full Colour (200 PCS)</td>
+                <td class="py-4 px-4 text-slate-500 whitespace-nowrap">08 Sep 2026</td>
+                <td class="py-4 px-4 text-center whitespace-nowrap">
+                  <span
+                    class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Diserahkan
+                  </span>
+                </td>
+                <td class="py-4 px-5 text-center whitespace-nowrap">
+                  <button onclick="openCetakModal('Tiket BON-202609-00006', 'Map Kantor Full Colour (200 PCS)')"
+                    class="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 font-semibold text-slate-600 text-xs shadow-2xs inline-flex items-center gap-1.5 transition">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                      </path>
+                    </svg>
+                    <span>Cetak</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- MODULE 4: BON ATK SUBMENU 3: MASTER BARANG                                -->
+    <!-- ========================================================================= -->
+    <section id="page-bon-atk-master" class="page-section hidden">
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">Master Barang</h1>
+          <p class="text-slate-500 text-sm mt-1.5">Kelola data barang ATK, foto, dan stok batas minimum.</p>
+        </div>
+
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <button onclick="showToast('Mengunduh master data inventaris (.xlsx)...', 'info')"
+            class="px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold text-xs shadow-2xs transition flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            <span>Download</span>
+          </button>
+
+          <button onclick="openKelolaSatuanModal()"
+            class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs shadow-2xs transition flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+            <span>Edit Satuan</span>
+          </button>
+
+          <button onclick="openTambahBarangModal()"
+            class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-600/25 transition flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>Tambah Barang</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Master Inventory Cards Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+
+        <!-- Master Item 1 -->
+        <div
+          class="bg-white rounded-3xl p-3.5 border border-slate-200/90 shadow-card hover:shadow-lg transition flex flex-col justify-between">
+          <div>
+            <div
+              class="relative w-full h-28 bg-slate-50 rounded-2xl flex items-center justify-center p-2 mb-3 overflow-hidden border border-slate-100">
+              <span
+                class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/90 backdrop-blur-xs text-brand-700 border border-slate-200 shadow-2xs">
+                Stok: 4 PCS
+              </span>
+              <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+                </path>
+              </svg>
+            </div>
+            <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">Joyko Stabilo - Coklat</h4>
+          </div>
+          <div class="pt-3 mt-3 border-t border-slate-100 flex items-center gap-1.5">
+            <button onclick="openEditBarangModal('Joyko Stabilo - Coklat', 'PCS', 4, 1)"
+              class="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+              Edit
+            </button>
+            <button onclick="openQuickAddStockModal('Joyko Stabilo - Coklat', 4, 'PCS')"
+              class="py-1.5 px-3 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-xl text-xs font-bold transition">
+              + Stok
+            </button>
+          </div>
+        </div>
+
+        <!-- Master Item 2 -->
+        <div
+          class="bg-white rounded-3xl p-3.5 border border-slate-200/90 shadow-card hover:shadow-lg transition flex flex-col justify-between">
+          <div>
+            <div
+              class="relative w-full h-28 bg-slate-50 rounded-2xl flex items-center justify-center p-2 mb-3 overflow-hidden border border-slate-100">
+              <span
+                class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/90 backdrop-blur-xs text-brand-700 border border-slate-200 shadow-2xs">
+                Stok: 8 PCS
+              </span>
+              <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
+                </path>
+              </svg>
+            </div>
+            <h4 class="text-xs font-bold text-slate-800 leading-snug line-clamp-2">PUNCH 85 Kenko</h4>
+          </div>
+          <div class="pt-3 mt-3 border-t border-slate-100 flex items-center gap-1.5">
+            <button onclick="openEditBarangModal('PUNCH 85 Kenko', 'PCS', 8, 2)"
+              class="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+              Edit
+            </button>
+            <button onclick="openQuickAddStockModal('PUNCH 85 Kenko', 8, 'PCS')"
+              class="py-1.5 px-3 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-xl text-xs font-bold transition">
+              + Stok
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DIALOGS CONTAINER                                                   -->
+  <!-- ========================================================================= -->
+
+  <!-- 1. MODAL: FORM PENGAJUAN PEMINJAMAN SARANA -->
+  <div id="booking-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="booking-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Form Pengajuan Peminjaman</h3>
+        <button onclick="closeModal('booking-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+
+      <form onsubmit="handleGenericSubmit(event, 'booking-modal', 'Pengajuan peminjaman kendaraan berhasil dikirim!')"
+        class="space-y-4 text-xs">
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Provinsi Tujuan <span
+                class="text-rose-500">*</span></label>
+            <select required class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+              <option value="Jawa Timur">Jawa Timur</option>
+              <option value="Jawa Tengah">Jawa Tengah</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kota/Kab Tujuan <span
+                class="text-rose-500">*</span></label>
+            <select required class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+              <option value="Kota Malang">Kota Malang</option>
+              <option value="Kota Surabaya">Kota Surabaya</option>
+              <option value="Kota Kediri">Kota Kediri</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Keperluan <span
+              class="text-rose-500">*</span></label>
+          <textarea rows="3" required placeholder="Jelaskan keperluan peminjaman dinas Anda..."
+            class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 outline-none resize-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Mulai <span
+                class="text-rose-500">*</span></label>
+            <input type="date" required value="2026-09-08"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Selesai <span
+                class="text-rose-500">*</span></label>
+            <input type="date" required value="2026-09-08"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Pilihan Armada <span
+              class="text-rose-500">*</span></label>
+          <select required class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+            <option value="">Pilih Armada Tersedia</option>
+            <option selected>All New Ertiga A/T (N 1619 AP)</option>
+            <option>Xpander (N 1443 AP)</option>
+            <option>New Kijang Innova M/T (N 1720 AP)</option>
+          </select>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('booking-modal')"
+            class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+          <button type="submit"
+            class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition">Ajukan
+            Peminjaman</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. MODAL: EXPORT LAPORAN SARANA -->
+  <div id="export-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="export-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Export Laporan Peminjaman</h3>
+        <button onclick="closeModal('export-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+
+      <p class="text-xs text-slate-500 mb-4">Pilih rentang periode laporan yang ingin diunduh (Format: Excel .xlsx).</p>
+
+      <div class="grid grid-cols-2 gap-3 text-xs mb-5">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Bulan</label>
+          <select class="w-full px-3 py-2 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+            <option>September</option>
+            <option>Agustus</option>
+            <option>Juli</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tahun</label>
+          <select class="w-full px-3 py-2 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+            <option>2026</option>
+            <option>2025</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+        <button type="button" onclick="closeModal('export-modal')"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+        <button type="button"
+          onclick="closeModal('export-modal'); showToast('Laporan peminjaman Excel (.xlsx) berhasil diunduh!', 'success')"
+          class="px-5 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/25 flex items-center gap-1.5 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          <span>Unduh Laporan</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MODAL: APPROVE CONFIRMATION (SARANA) -->
+  <div id="approve-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200 text-center"
+      id="approve-modal-content">
+      <div
+        class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3 border border-emerald-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">Konfirmasi Persetujuan</h3>
+      <p id="approve-modal-subtext" class="text-xs text-slate-500 mt-1 mb-5">Apakah Anda yakin ingin menyetujui
+        peminjaman ini?</p>
+      <div class="flex justify-center gap-2.5">
+        <button onclick="closeModal('approve-modal')"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+        <button onclick="confirmApproveBooking()"
+          class="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/25 transition">Ya,
+          Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MODAL: REJECT CONFIRMATION (SARANA) -->
+  <div id="reject-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200 text-center"
+      id="reject-modal-content">
+      <div
+        class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3 border border-rose-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+          </path>
+        </svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">Konfirmasi Penolakan</h3>
+      <p id="reject-modal-subtext" class="text-xs text-slate-500 mt-1 mb-5">Apakah Anda yakin ingin menolak peminjaman
+        ini?</p>
+      <div class="flex justify-center gap-2.5">
+        <button onclick="closeModal('reject-modal')"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+        <button onclick="confirmRejectBooking()"
+          class="px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/25 transition">Ya,
+          Tolak</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MODAL: EDIT PEMINJAMAN SARANA -->
+  <div id="edit-booking-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="edit-booking-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Edit Peminjaman</h3>
+        <button onclick="closeModal('edit-booking-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+      <form onsubmit="handleGenericSubmit(event, 'edit-booking-modal', 'Perubahan peminjaman berhasil disimpan!')"
+        class="space-y-4 text-xs">
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Provinsi</label>
+            <input type="text" id="edit-booking-prov" value="Jawa Timur"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kota Tujuan</label>
+            <input type="text" id="edit-booking-kota" value="Kota Malang"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Keperluan</label>
+          <textarea id="edit-booking-keperluan" rows="3"
+            class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 outline-none resize-none">Penyampaian Surat Paksa Pajak</textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Mulai</label>
+            <input type="date" id="edit-booking-mulai" value="2026-09-08"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Selesai</label>
+            <input type="date" id="edit-booking-selesai" value="2026-09-08"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Armada (Kendaraan)</label>
+          <input type="text" id="edit-booking-armada" value="Xpander (N 1443 AP)"
+            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+        </div>
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('edit-booking-modal')"
+            class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+          <button type="submit"
+            class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition">Simpan
+            Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. MODAL: HAPUS PEMINJAMAN SARANA -->
+  <div id="delete-booking-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200 text-center"
+      id="delete-booking-modal-content">
+      <div
+        class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3 border border-rose-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+          </path>
+        </svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">Konfirmasi Hapus Data</h3>
+      <p id="delete-booking-subtext" class="text-xs text-slate-500 mt-1 mb-5">Apakah Anda yakin ingin menghapus data
+        peminjaman ini secara permanen?</p>
+      <div class="flex justify-center gap-2.5">
+        <button onclick="closeModal('delete-booking-modal')"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+        <button onclick="confirmDeleteBooking()"
+          class="px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/25 transition">Ya,
+          Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. MODAL: TAMBAH KENDARAAN (ARMADA) -->
+  <div id="add-vehicle-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="add-vehicle-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Tambah Kendaraan</h3>
+        <button onclick="closeModal('add-vehicle-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+      <form onsubmit="handleGenericSubmit(event, 'add-vehicle-modal', 'Kendaraan armada baru berhasil didaftarkan!')"
+        class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Kendaraan <span
+              class="text-rose-500">*</span></label>
+          <input type="text" required placeholder="Contoh: Toyota Kijang Innova Zenix"
+            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Plat Nomor <span
+              class="text-rose-500">*</span></label>
+          <input type="text" required placeholder="Contoh: N 1234 XY"
+            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none font-mono uppercase" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Status Awal</label>
+          <select class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+            <option>Aktif (Tersedia)</option>
+            <option>Dalam Perbaikan (Maintenance)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Foto Kendaraan
+            (Opsional)</label>
+          <div
+            class="border-2 border-dashed border-slate-200 hover:border-brand-500 rounded-2xl p-6 text-center bg-slate-50/50 cursor-pointer">
+            <svg class="w-8 h-8 mx-auto text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+              </path>
+            </svg>
+            <span class="text-[11px] text-slate-500">Klik untuk upload foto armada</span>
+          </div>
+        </div>
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('add-vehicle-modal')"
+            class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+          <button type="submit"
+            class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition">Simpan
+            Kendaraan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. MODAL: FORM PENGAJUAN PERMISI -->
+  <div id="permisi-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="permisi-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Form Pengajuan Permisi</h3>
+        <button onclick="closeModal('permisi-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+      <form onsubmit="handleGenericSubmit(event, 'permisi-modal', 'Permohonan izin keluar berhasil diajukan!')"
+        class="space-y-4 text-xs">
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Izin <span
+                class="text-rose-500">*</span></label>
+            <select required class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+              <option value="">Pilih Kategori</option>
+              <option>Kesehatan</option>
+              <option>Keluarga</option>
+              <option selected>Lain-lain</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Jenis Izin <span
+                class="text-rose-500">*</span></label>
+            <select required class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+              <option selected>Permohonan</option>
+              <option>Pemberitahuan</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Mulai <span
+                class="text-rose-500">*</span></label>
+            <input type="datetime-local" required value="2026-09-08T14:37"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Selesai <span
+                class="text-rose-500">*</span></label>
+            <input type="datetime-local" required value="2026-09-08T15:38"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Keperluan <span
+              class="text-rose-500">*</span></label>
+          <textarea rows="3" required placeholder="Jelaskan keperluan izin Anda..."
+            class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 outline-none resize-none"></textarea>
+        </div>
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('permisi-modal')"
+            class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+          <button type="submit"
+            class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition">Kirim
+            Pengajuan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 9. MODAL: EDIT PERMISI -->
+  <div id="edit-permisi-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="edit-permisi-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Edit Data Permisi</h3>
+        <button onclick="closeModal('edit-permisi-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+      <form onsubmit="handleGenericSubmit(event, 'edit-permisi-modal', 'Perubahan izin permisi berhasil disimpan!')"
+        class="space-y-4 text-xs">
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kategori Izin</label>
+            <input type="text" id="edit-permisi-kategori" value="Lain-lain"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Jenis Izin</label>
+            <input type="text" id="edit-permisi-jenis" value="Permohonan"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Mulai</label>
+            <input type="text" id="edit-permisi-mulai" value="08/09/2026 14:37"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Selesai</label>
+            <input type="text" id="edit-permisi-selesai" value="08/09/2026 15:38"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Keperluan</label>
+          <textarea id="edit-permisi-keperluan" rows="3"
+            class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 outline-none resize-none">Tes percobaan sistem integrasi</textarea>
+        </div>
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('edit-permisi-modal')"
+            class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+          <button type="submit"
+            class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition">Simpan
+            Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 10. MODAL: BATALKAN PERMOHONAN PERMISI -->
+  <div id="cancel-permisi-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200 text-center"
+      id="cancel-permisi-modal-content">
+      <div
+        class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3 border border-rose-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+          </path>
+        </svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">Batalkan Permohonan</h3>
+      <p id="cancel-permisi-subtext" class="text-xs text-slate-500 mt-1 mb-5">Apakah Anda yakin ingin membatalkan
+        permohonan izin ini?</p>
+      <div class="flex justify-center gap-2.5">
+        <button onclick="closeModal('cancel-permisi-modal')"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+        <button
+          onclick="closeModal('cancel-permisi-modal'); showToast('Permohonan izin berhasil dibatalkan!', 'warning')"
+          class="px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/25 transition">Ya,
+          Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. MODAL: APPROVE PERMISI (ATASAN) -->
+  <div id="approve-permisi-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200 text-center"
+      id="approve-permisi-modal-content">
+      <div
+        class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3 border border-emerald-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">Setujui Permohonan</h3>
+      <p id="approve-permisi-subtext" class="text-xs text-slate-500 mt-1 mb-5">Apakah Anda yakin ingin menyetujui
+        permohonan izin ini?</p>
+      <div class="flex justify-center gap-2.5">
+        <button onclick="closeModal('approve-permisi-modal')"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+        <button
+          onclick="closeModal('approve-permisi-modal'); showToast('Permohonan izin pegawai telah disetujui!', 'success')"
+          class="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/25 transition">Ya,
+          Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. MODAL: REJECT PERMISI (ATASAN) -->
+  <div id="reject-permisi-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200 text-center"
+      id="reject-permisi-modal-content">
+      <div
+        class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3 border border-rose-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">Tolak Permohonan</h3>
+      <p id="reject-permisi-subtext" class="text-xs text-slate-500 mt-1 mb-5">Apakah Anda yakin ingin menolak permohonan
+        izin ini?</p>
+      <div class="flex justify-center gap-2.5">
+        <button onclick="closeModal('reject-permisi-modal')"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+        <button
+          onclick="closeModal('reject-permisi-modal'); showToast('Permohonan izin pegawai telah ditolak.', 'warning')"
+          class="px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/25 transition">Ya,
+          Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13. MODAL: PENGAMBILAN NOMOR SURAT (ASMARA) -->
+  <div id="letter-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200 max-h-[90vh] overflow-y-auto"
+      id="letter-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Pengambilan Nomor Surat</h3>
+        <button onclick="closeModal('letter-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+      <form onsubmit="handleGenericSubmit(event, 'letter-modal', 'Nomor surat dinas baru berhasil diterbitkan!')"
+        class="space-y-4 text-xs">
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Jenis Surat <span
+                class="text-rose-500">*</span></label>
+            <select id="letter-modal-type" onchange="updateLetterPreview()" required
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+              <option value="SICT-">Surat Izin Cuti Tahunan (SICT)</option>
+              <option value="ND-">Nota Dinas (ND)</option>
+              <option value="S-">Surat Biasa (S)</option>
+              <option value="BA-">Berita Acara (BA)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Jenis PJ <span
+                class="text-rose-500">*</span></label>
+            <select id="letter-modal-pj" onchange="updateLetterPreview()" required
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+              <option value="/KPP.1209/">/KPP.1209/</option>
+              <option value="/KPP.1209/PPNPN/">/KPP.1209/PPNPN/</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tahun Surat</label>
+            <input type="text" id="letter-modal-year" value="2026"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Preview Nomor Surat</label>
+            <div id="letter-preview-box"
+              class="px-3 py-2.5 bg-brand-50 text-brand-700 font-mono font-bold rounded-xl border border-brand-200">
+              SICT-319/KPP.1209/2026
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tanggal Surat</label>
+            <input type="date" value="2026-09-08"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Konseptor</label>
+            <input type="text" value="Dhafin Fuad Mahathir" readonly
+              class="w-full px-3.5 py-2.5 bg-slate-100 text-slate-600 rounded-xl border border-slate-200 outline-none" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Perihal <span
+              class="text-rose-500">*</span></label>
+          <input type="text" required placeholder="Masukkan perihal surat..."
+            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tujuan Surat <span
+              class="text-rose-500">*</span></label>
+          <input type="text" required placeholder="Masukkan tujuan surat..."
+            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+        </div>
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('letter-modal')"
+            class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+          <button type="submit"
+            class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition">Simpan
+            Data</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 14. MODAL: NOMOR SURAT KAHAR -->
+  <div id="kahar-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200 max-h-[90vh] overflow-y-auto"
+      id="kahar-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Form Penginputan Nomor Surat Kahar</h3>
+        <button onclick="closeModal('kahar-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+
+      <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-5 text-xs">
+        <h4 class="font-bold text-slate-800 mb-3">Tambah Nomor Awal</h4>
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <input type="text" placeholder="Ketik jenis surat (contoh: KEP-)"
+            class="px-3 py-2 bg-white rounded-xl border border-slate-200 outline-none" />
+          <select class="px-3 py-2 bg-white rounded-xl border border-slate-200 outline-none">
+            <option>/KPP.1209/</option>
+            <option>/PPN/KPP.1209/</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <input type="number" value="2026"
+            class="px-3 py-2 bg-white rounded-xl border border-slate-200 outline-none" />
+          <input type="number" placeholder="Nomor Awal (cth: 91000)"
+            class="px-3 py-2 bg-white rounded-xl border border-slate-200 outline-none" />
+        </div>
+        <div class="flex justify-end">
+          <button onclick="showToast('Konfigurasi nomor surat kahar disimpan!', 'success')"
+            class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold transition">Simpan</button>
+        </div>
+      </div>
+
+      <h4 class="text-xs font-bold text-slate-800 mb-2">Daftar Pengaturan Nomor Awal</h4>
+      <div class="overflow-x-auto border border-slate-200 rounded-2xl text-xs">
+        <table class="w-full text-left">
+          <thead class="bg-slate-50 border-b border-slate-200 font-bold text-slate-500">
+            <tr>
+              <th class="p-2.5">Jenis</th>
+              <th class="p-2.5">PJ</th>
+              <th class="p-2.5">Tahun</th>
+              <th class="p-2.5 text-center">Nomor Awal</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr>
+              <td class="p-2.5 font-bold">SERT-</td>
+              <td class="p-2.5">/KPP.1209/</td>
+              <td class="p-2.5">2026</td>
+              <td class="p-2.5 text-center font-mono font-bold text-brand-600">1</td>
+            </tr>
+            <tr>
+              <td class="p-2.5 font-bold">KEP-</td>
+              <td class="p-2.5">/PPN/KPP.1209/</td>
+              <td class="p-2.5">2025</td>
+              <td class="p-2.5 text-center font-mono font-bold text-brand-600">91000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pt-4 mt-5 border-t border-slate-100 flex justify-end">
+        <button onclick="closeModal('kahar-modal')"
+          class="px-5 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 15. MODAL: EDIT SURAT KELUAR -->
+  <div id="edit-letter-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="edit-letter-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Edit Surat Keluar</h3>
+        <button onclick="closeModal('edit-letter-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+      <form onsubmit="handleGenericSubmit(event, 'edit-letter-modal', 'Perubahan surat keluar berhasil disimpan!')"
+        class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nomor Surat (Permanen)</label>
+          <input type="text" id="edit-letter-no" readonly
+            class="w-full px-3.5 py-2.5 bg-slate-100 font-mono font-bold text-brand-700 rounded-xl border border-slate-200 outline-none" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Perihal</label>
+          <input type="text" id="edit-letter-perihal"
+            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tujuan Surat</label>
+          <input type="text" id="edit-letter-tujuan"
+            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+        </div>
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('edit-letter-modal')"
+            class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+          <button type="submit"
+            class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition">Simpan
+            Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 16. MODAL: HAPUS SURAT -->
+  <div id="delete-letter-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200 text-center"
+      id="delete-letter-modal-content">
+      <div
+        class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3 border border-rose-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+          </path>
+        </svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">Hapus Surat</h3>
+      <p id="delete-letter-subtext" class="text-xs text-slate-500 mt-1 mb-5">Apakah Anda yakin ingin menghapus surat
+        ini?</p>
+      <div class="flex justify-center gap-2.5">
+        <button onclick="closeModal('delete-letter-modal')"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+        <button
+          onclick="closeModal('delete-letter-modal'); showToast('Nomor surat berhasil dihapus/dibatalkan!', 'warning')"
+          class="px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/25 transition">Ya,
+          Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 17. MODAL: KERANJANG PERMINTAAN ATK -->
+  <div id="keranjang-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="keranjang-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Keranjang Permintaan ATK</h3>
+        <button onclick="closeModal('keranjang-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+
+      <div class="mb-4">
+        <label class="block font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-2">Item Dipilih</label>
+        <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
+          <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-800">AMPLOP PAPERLINE 110</p>
+              <p class="text-[11px] text-slate-400">3 PCS</p>
+            </div>
+            <button onclick="removeCartItem(this)"
+              class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition">&times;</button>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-800">Alkaline Baterai AA 4B+2</p>
+              <p class="text-[11px] text-slate-400">2 PCS</p>
+            </div>
+            <button onclick="removeCartItem(this)"
+              class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition">&times;</button>
+          </div>
+        </div>
+      </div>
+
+      <form onsubmit="handleKirimPermintaanATK(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Untuk Keperluan <span
+              class="text-rose-500">*</span></label>
+          <textarea rows="3" required placeholder="Tuliskan tujuan peruntukan barang ATK ini..."
+            class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 outline-none resize-none"></textarea>
+        </div>
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('keranjang-modal')"
+            class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+          <button type="submit"
+            class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition">Kirim
+            Permintaan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 18. MODAL: EXPORT BON ATK -->
+  <div id="export-bon-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="export-bon-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Export Laporan Bon ATK</h3>
+        <button onclick="closeModal('export-bon-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+      <p class="text-xs text-slate-500 mb-4">Pilih periode data yang akan diekspor (Format: Excel .xlsx).</p>
+      <div class="grid grid-cols-2 gap-3 text-xs mb-5">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Bulan</label>
+          <select class="w-full px-3 py-2 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+            <option>September</option>
+            <option>Agustus</option>
+            <option>Juli</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tahun</label>
+          <select class="w-full px-3 py-2 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+            <option>2026</option>
+            <option>2025</option>
+          </select>
+        </div>
+      </div>
+      <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+        <button type="button" onclick="closeModal('export-bon-modal')"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+        <button type="button"
+          onclick="closeModal('export-bon-modal'); showToast('Laporan Bon ATK Excel berhasil diunduh!', 'success')"
+          class="px-5 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/25 flex items-center gap-1.5 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          <span>Download</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 19. MODAL: TAMBAH BARANG ATK -->
+  <div id="tambah-barang-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="tambah-barang-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Tambah Barang</h3>
+        <button onclick="closeModal('tambah-barang-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+      <form onsubmit="handleGenericSubmit(event, 'tambah-barang-modal', 'Barang ATK baru berhasil ditambahkan!')"
+        class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Barang <span
+              class="text-rose-500">*</span></label>
+          <input type="text" required placeholder="Contoh: Kertas HVS A4 80gr"
+            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Satuan <span
+              class="text-rose-500">*</span></label>
+          <select required class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+            <option value="">Pilih Satuan</option>
+            <option>PCS</option>
+            <option>BOX</option>
+            <option>RIM</option>
+            <option>PAK KECIL</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Stok Awal</label>
+            <input type="number" min="0" value="0"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Stok Minimum (Warning)</label>
+            <input type="number" min="1" value="5"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Foto Barang (Opsional)</label>
+          <input type="file"
+            class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100" />
+        </div>
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('tambah-barang-modal')"
+            class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+          <button type="submit"
+            class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 20. MODAL: EDIT MASTER BARANG ATK -->
+  <div id="edit-barang-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="edit-barang-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Edit Barang</h3>
+        <button onclick="closeModal('edit-barang-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+      <form onsubmit="handleGenericSubmit(event, 'edit-barang-modal', 'Perubahan barang berhasil disimpan!')"
+        class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Barang</label>
+          <input type="text" id="edit-barang-name"
+            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Satuan</label>
+          <select id="edit-barang-satuan"
+            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+            <option value="PCS">PCS</option>
+            <option value="BOX">BOX</option>
+            <option value="RIM">RIM</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Stok Saat Ini</label>
+            <input type="number" id="edit-barang-stok"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Stok Minimum</label>
+            <input type="number" id="edit-barang-min"
+              class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+          </div>
+        </div>
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('edit-barang-modal')"
+            class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+          <button type="submit"
+            class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition">Simpan
+            Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 21. MODAL: KELOLA SATUAN -->
+  <div id="kelola-satuan-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="kelola-satuan-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Kelola Satuan</h3>
+        <button onclick="closeModal('kelola-satuan-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+      <div class="mb-4">
+        <label class="block font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">Tambah Satuan
+          Baru</label>
+        <div class="flex gap-2">
+          <input type="text" id="new-satuan-input" placeholder="Contoh: PCS, BOX, RIM..."
+            class="flex-1 px-3 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs outline-none" />
+          <button type="button" onclick="addNewSatuan()"
+            class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition">+
+            Tambah</button>
+        </div>
+      </div>
+      <div class="border border-slate-200 rounded-2xl overflow-hidden text-xs">
+        <table class="w-full text-left">
+          <thead class="bg-slate-50 border-b border-slate-200 font-bold text-slate-500">
+            <tr>
+              <th class="p-2.5">Nama Satuan</th>
+              <th class="p-2.5 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="satuan-table-body" class="divide-y divide-slate-100">
+            <tr>
+              <td class="p-2.5 font-semibold text-slate-800">BOX</td>
+              <td class="p-2.5 text-center"><button onclick="showToast('Satuan BOX telah diupdate', 'info')"
+                  class="text-amber-600 hover:underline">Edit</button></td>
+            </tr>
+            <tr>
+              <td class="p-2.5 font-semibold text-slate-800">PAK KECIL</td>
+              <td class="p-2.5 text-center"><button onclick="showToast('Satuan PAK KECIL telah diupdate', 'info')"
+                  class="text-amber-600 hover:underline">Edit</button></td>
+            </tr>
+            <tr>
+              <td class="p-2.5 font-semibold text-slate-800">PCS</td>
+              <td class="p-2.5 text-center"><button onclick="showToast('Satuan PCS telah diupdate', 'info')"
+                  class="text-amber-600 hover:underline">Edit</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pt-4 mt-4 border-t border-slate-100 flex justify-end">
+        <button onclick="closeModal('kelola-satuan-modal')"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 22. MODAL: TAMBAH STOK CEPAT (+ STOK) -->
+  <div id="add-stock-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="add-stock-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Tambah Stok Masuk</h3>
+        <button onclick="closeModal('add-stock-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+      <p id="add-stock-item-title" class="text-xs font-bold text-brand-700 mb-4">Joyko Stabilo - Coklat</p>
+      <form onsubmit="handleGenericSubmit(event, 'add-stock-modal', 'Stok barang berhasil diperbarui!')"
+        class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Jumlah Tambahan Masuk</label>
+          <input type="number" min="1" value="10" required
+            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none font-bold text-sm" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">Catatan Masuk (Opsional)</label>
+          <input type="text" placeholder="Contoh: Pengadaan Triwulan III"
+            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none" />
+        </div>
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal('add-stock-modal')"
+            class="px-4 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition">+
+            Tambah Stok</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 23. MODAL: CETAK DOKUMEN / BUKTI -->
+  <div id="cetak-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 duration-200"
+      id="cetak-modal-content">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Pratinjau Dokumen Cetak</h3>
+        <button onclick="closeModal('cetak-modal')"
+          class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none">&times;</button>
+      </div>
+      <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs mb-4">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <p id="cetak-doc-title" class="font-bold text-slate-800">Tiket Permohonan</p>
+        </div>
+        <p id="cetak-doc-desc" class="text-slate-500 leading-relaxed">Dokumen siap untuk dicetak atau diekspor ke format
+          PDF digital kantor.</p>
+      </div>
+      <div class="flex justify-end gap-2.5">
+        <button onclick="closeModal('cetak-modal')"
+          class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Tutup</button>
+        <button onclick="closeModal('cetak-modal'); showToast('Dokumen berhasil dikirim ke antrean cetak!', 'success')"
+          class="px-5 py-2.5 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/25 flex items-center gap-1.5 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+            </path>
+          </svg>
+          <span>Cetak Sekarang</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Element -->
+  <div id="toast"
+    class="fixed bottom-6 right-6 z-50 transform translate-y-16 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-3 p-4 rounded-2xl shadow-xl border bg-white max-w-sm">
+    <div id="toast-icon-wrapper" class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"></div>
+    <div class="text-xs">
+      <p id="toast-title" class="font-bold text-slate-800"></p>
+      <p id="toast-desc" class="text-slate-500 mt-0.5"></p>
+    </div>
+  </div>
+
+  <script>
+    // State Tracking
+    let currentPageId = 'sarana-persetujuan';
+    let cartItemCount = 2;
+    let targetBookingName = '';
+    let targetBookingCar = '';
+
+    // Switch Page Navigation Controller
+    function switchPage(pageId) {
+      const sections = document.querySelectorAll('.page-section');
+      sections.forEach(sec => sec.classList.add('hidden'));
+
+      const target = document.getElementById('page-' + pageId);
+      if (target) {
+        target.classList.remove('hidden');
+        currentPageId = pageId;
+      }
+
+      closeAllDropdowns();
+      updateNavPills(pageId);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Update active style on navbar items
+    function updateNavPills(pageId) {
+      const saranaBtn = document.getElementById('nav-sarana-btn');
+      const permisiBtn = document.getElementById('nav-permisi-btn');
+      const asmaraBtn = document.getElementById('nav-asmara-btn');
+      const bonAtkBtn = document.getElementById('nav-bon-atk-btn');
+
+      const defaultClass = "nav-item flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all duration-150";
+      const activeClass = "nav-item flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-150 bg-brand-50 text-brand-700 shadow-2xs";
+
+      if (saranaBtn) saranaBtn.className = pageId.startsWith('sarana-') ? activeClass : defaultClass;
+      if (permisiBtn) permisiBtn.className = pageId.startsWith('permisi-') ? activeClass : defaultClass;
+      if (asmaraBtn) asmaraBtn.className = pageId.startsWith('asmara-') ? activeClass : defaultClass;
+      if (bonAtkBtn) bonAtkBtn.className = pageId.startsWith('bon-atk-') ? activeClass : defaultClass;
+    }
+
+    // Dropdown Controllers
+    function toggleSaranaDropdown() {
+      const drop = document.getElementById('sarana-dropdown');
+      const isHidden = drop.classList.contains('hidden');
+      closeAllDropdowns();
+      if (isHidden) drop.classList.remove('hidden');
+    }
+
+    function togglePermisiDropdown() {
+      const drop = document.getElementById('permisi-dropdown');
+      const isHidden = drop.classList.contains('hidden');
+      closeAllDropdowns();
+      if (isHidden) drop.classList.remove('hidden');
+    }
+
+    function toggleAsmaraDropdown() {
+      const drop = document.getElementById('asmara-dropdown');
+      const isHidden = drop.classList.contains('hidden');
+      closeAllDropdowns();
+      if (isHidden) drop.classList.remove('hidden');
+    }
+
+    function toggleBonAtkDropdown() {
+      const drop = document.getElementById('bon-atk-dropdown');
+      const isHidden = drop.classList.contains('hidden');
+      closeAllDropdowns();
+      if (isHidden) drop.classList.remove('hidden');
+    }
+
+    function closeAllDropdowns() {
+      const drops = ['sarana-dropdown', 'permisi-dropdown', 'asmara-dropdown', 'bon-atk-dropdown'];
+      drops.forEach(id => {
+        const d = document.getElementById(id);
+        if (d) d.classList.add('hidden');
+      });
+    }
+
+    // Generic Modal Show & Hide
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + '-content');
+      if (!modal || !content) return;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + '-content');
+      if (!modal || !content) return;
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+      }, 200);
+    }
+
+    function handleGenericSubmit(e, modalId, successMessage) {
+      e.preventDefault();
+      closeModal(modalId);
+      showToast(successMessage, 'success');
+    }
+
+    // Modal Specific Handlers
+    // 1 & 2. Sarana
+    function openBookingModal() { openModal('booking-modal'); }
+    function openExportModal() { openModal('export-modal'); }
+
+    function openApproveModal(name, car) {
+      targetBookingName = name;
+      targetBookingCar = car;
+      const sub = document.getElementById('approve-modal-subtext');
+      if (sub) sub.textContent = `Setujui peminjaman untuk: ${name} (${car})?`;
+      openModal('approve-modal');
+    }
+    function confirmApproveBooking() {
+      closeModal('approve-modal');
+      showToast(`Peminjaman atas nama ${targetBookingName} berhasil disetujui!`, 'success');
+    }
+
+    function openRejectModal(name) {
+      targetBookingName = name;
+      const sub = document.getElementById('reject-modal-subtext');
+      if (sub) sub.textContent = `Tolak permohonan atas nama: ${name}?`;
+      openModal('reject-modal');
+    }
+    function confirmRejectBooking() {
+      closeModal('reject-modal');
+      showToast(`Peminjaman atas nama ${targetBookingName} telah ditolak.`, 'warning');
+    }
+
+    function openEditBookingModal(name, armada, keperluan, kota, tglMulai, tglSelesai) {
+      document.getElementById('edit-booking-armada').value = armada;
+      document.getElementById('edit-booking-keperluan').value = keperluan;
+      document.getElementById('edit-booking-kota').value = kota;
+      document.getElementById('edit-booking-mulai').value = tglMulai;
+      document.getElementById('edit-booking-selesai').value = tglSelesai;
+      openModal('edit-booking-modal');
+    }
+
+    function openDeleteBookingModal(name, armada) {
+      targetBookingName = name;
+      const sub = document.getElementById('delete-booking-subtext');
+      if (sub) sub.textContent = `Hapus data peminjaman ${name} - ${armada} secara permanen?`;
+      openModal('delete-booking-modal');
+    }
+    function confirmDeleteBooking() {
+      closeModal('delete-booking-modal');
+      showToast(`Data peminjaman ${targetBookingName} berhasil dihapus.`, 'warning');
+    }
+
+    function openAddVehicleModal() { openModal('add-vehicle-modal'); }
+
+    function toggleCarStatus(btn) {
+      const dot = btn.querySelector('div');
+      if (btn.classList.contains('bg-emerald-500')) {
+        btn.classList.remove('bg-emerald-500');
+        btn.classList.add('bg-slate-300');
+        dot.classList.remove('translate-x-4');
+        dot.classList.add('translate-x-0');
+        showToast('Status kendaraan diubah ke Nonaktif / Servis', 'warning');
+      } else {
+        btn.classList.remove('bg-slate-300');
+        btn.classList.add('bg-emerald-500');
+        dot.classList.remove('translate-x-0');
+        dot.classList.add('translate-x-4');
+        showToast('Status kendaraan diubah ke Aktif (Tersedia)', 'success');
+      }
+    }
+
+    // Permisi Modals
+    function openPermisiModal() { openModal('permisi-modal'); }
+    function openEditPermisiModal(kategori, jenis, mulai, selesai, keperluan) {
+      document.getElementById('edit-permisi-kategori').value = kategori;
+      document.getElementById('edit-permisi-jenis').value = jenis;
+      document.getElementById('edit-permisi-mulai').value = mulai;
+      document.getElementById('edit-permisi-selesai').value = selesai;
+      document.getElementById('edit-permisi-keperluan').value = keperluan;
+      openModal('edit-permisi-modal');
+    }
+    function openCancelPermisiModal(name, keperluan) {
+      const sub = document.getElementById('cancel-permisi-subtext');
+      if (sub) sub.textContent = `Batalkan izin ${name} (${keperluan})?`;
+      openModal('cancel-permisi-modal');
+    }
+    function openApprovePermisiModal(name, keperluan) {
+      const sub = document.getElementById('approve-permisi-subtext');
+      if (sub) sub.textContent = `Setujui permohonan izin dari ${name} (${keperluan})?`;
+      openModal('approve-permisi-modal');
+    }
+    function openRejectPermisiModal(name, keperluan) {
+      const sub = document.getElementById('reject-permisi-subtext');
+      if (sub) sub.textContent = `Tolak permohonan izin dari ${name} (${keperluan})?`;
+      openModal('reject-permisi-modal');
+    }
+
+    // Asmara Modals
+    function openLetterModal() { openModal('letter-modal'); }
+    function openKaharModal() { openModal('kahar-modal'); }
+    function updateLetterPreview() {
+      const type = document.getElementById('letter-modal-type').value;
+      const pj = document.getElementById('letter-modal-pj').value;
+      const year = document.getElementById('letter-modal-year').value;
+      const preview = document.getElementById('letter-preview-box');
+      if (preview) preview.textContent = `${type}319${pj}${year}`;
+    }
+    function openEditLetterModal(no, perihal, tujuan, konseptor) {
+      document.getElementById('edit-letter-no').value = no;
+      document.getElementById('edit-letter-perihal').value = perihal;
+      document.getElementById('edit-letter-tujuan').value = tujuan;
+      openModal('edit-letter-modal');
+    }
+    function openDeleteLetterModal(no, perihal) {
+      const sub = document.getElementById('delete-letter-subtext');
+      if (sub) sub.textContent = `Hapus arsip nomor ${no} (${perihal})?`;
+      openModal('delete-letter-modal');
+    }
+
+    // Bon ATK Modals
+    function openKeranjangModal() { openModal('keranjang-modal'); }
+    function openExportBonModal() { openModal('export-bon-modal'); }
+    function openTambahBarangModal() { openModal('tambah-barang-modal'); }
+    function openEditBarangModal(nama, satuan, stok, min) {
+      document.getElementById('edit-barang-name').value = nama;
+      document.getElementById('edit-barang-satuan').value = satuan;
+      document.getElementById('edit-barang-stok').value = stok;
+      document.getElementById('edit-barang-min').value = min;
+      openModal('edit-barang-modal');
+    }
+    function openKelolaSatuanModal() { openModal('kelola-satuan-modal'); }
+    function addNewSatuan() {
+      const input = document.getElementById('new-satuan-input');
+      const val = input.value.trim().toUpperCase();
+      if (!val) return;
+      const tbody = document.getElementById('satuan-table-body');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td class="p-2.5 font-semibold text-slate-800">${val}</td><td class="p-2.5 text-center"><button onclick="showToast('Satuan ${val} telah diupdate', 'info')" class="text-amber-600 hover:underline">Edit</button></td>`;
+      tbody.appendChild(tr);
+      input.value = '';
+      showToast(`Satuan "${val}" berhasil ditambahkan!`, 'success');
+    }
+
+    function openQuickAddStockModal(nama, currentStock, unit) {
+      document.getElementById('add-stock-item-title').textContent = `${nama} (Stok Saat Ini: ${currentStock} ${unit})`;
+      openModal('add-stock-modal');
+    }
+
+    function openCetakModal(title, desc) {
+      document.getElementById('cetak-doc-title').textContent = title;
+      document.getElementById('cetak-doc-desc').textContent = desc;
+      openModal('cetak-modal');
+    }
+
+    function removeCartItem(btn) {
+      const row = btn.closest('div.p-3');
+      if (row) row.remove();
+      cartItemCount = Math.max(0, cartItemCount - 1);
+      const badge = document.getElementById('cart-counter-badge');
+      if (badge) badge.textContent = cartItemCount;
+      showToast('Item dikeluarkan dari keranjang', 'info');
+    }
+    function handleKirimPermintaanATK(e) {
+      e.preventDefault();
+      closeModal('keranjang-modal');
+      showToast('Permintaan Bon ATK berhasil dikirimkan!', 'success');
+    }
+    function addToCart(name, qty) {
+      cartItemCount += 1;
+      const badge = document.getElementById('cart-counter-badge');
+      if (badge) badge.textContent = cartItemCount;
+      showToast(`${name} (${qty} PCS) dimasukkan ke keranjang`, 'success');
+    }
+
+    function handleLogout() {
+      showToast('Sesi telah berakhir. Mengalihkan ke halaman masuk...', 'info');
+      setTimeout(() => window.location.reload(), 1200);
+    }
+
+    // Toast Notification System
+    let toastTimeout;
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const toastTitle = document.getElementById('toast-title');
+      const toastDesc = document.getElementById('toast-desc');
+      const iconWrapper = document.getElementById('toast-icon-wrapper');
+
+      if (!toast || !toastTitle || !toastDesc || !iconWrapper) return;
+
+      clearTimeout(toastTimeout);
+
+      if (type === 'success') {
+        toastTitle.textContent = 'Berhasil';
+        iconWrapper.className = 'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-emerald-50 text-emerald-600 border border-emerald-200';
+        iconWrapper.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`;
+      } else if (type === 'warning') {
+        toastTitle.textContent = 'Perhatian';
+        iconWrapper.className = 'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-amber-50 text-amber-600 border border-amber-200';
+        iconWrapper.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+      } else {
+        toastTitle.textContent = 'Informasi';
+        iconWrapper.className = 'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-blue-50 text-blue-600 border border-blue-200';
+        iconWrapper.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+      }
+
+      toastDesc.textContent = message;
+      toast.classList.remove('translate-y-16', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-16', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+
+    // Auto-close dropdowns on outside click
+    window.addEventListener('click', (e) => {
+      const saranaBtn = document.getElementById('nav-sarana-btn');
+      const permisiBtn = document.getElementById('nav-permisi-btn');
+      const asmaraBtn = document.getElementById('nav-asmara-btn');
+      const bonAtkBtn = document.getElementById('nav-bon-atk-btn');
+      const sDrop = document.getElementById('sarana-dropdown');
+      const pDrop = document.getElementById('permisi-dropdown');
+      const aDrop = document.getElementById('asmara-dropdown');
+      const bDrop = document.getElementById('bon-atk-dropdown');
+
+      if (saranaBtn && !saranaBtn.contains(e.target) && sDrop && !sDrop.contains(e.target)) sDrop.classList.add('hidden');
+      if (permisiBtn && !permisiBtn.contains(e.target) && pDrop && !pDrop.contains(e.target)) pDrop.classList.add('hidden');
+      if (asmaraBtn && !asmaraBtn.contains(e.target) && aDrop && !aDrop.contains(e.target)) aDrop.classList.add('hidden');
+      if (bonAtkBtn && !bonAtkBtn.contains(e.target) && bDrop && !bDrop.contains(e.target)) bDrop.classList.add('hidden');
+    });
+
+    // Default boot on load
+    window.addEventListener('DOMContentLoaded', () => {
+      switchPage('sarana-persetujuan');
+    });
+  </script>
+</body>
+
+</html>
