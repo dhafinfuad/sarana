@@ -33,7 +33,7 @@ Thumbs.db
 /resources/views_backup_*
 
 # Screenshots & Portfolio Showcase
-/public/screenshots_portfolio*
+/public/screenshots_portfolio/
 /public/portfolio_banner.html
 
 # Data Dumps & Raw Datasets
