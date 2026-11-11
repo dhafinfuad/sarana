@@ -22,14 +22,14 @@ class UserFactory extends Factory
 
     /**
      * Define the model's default state.
-     * Default menghasilkan user dengan role 'pegawai'.
+     * Default menghasilkan user dengan jabatan 'Pelaksana' (UserRole::Pegawai).
      *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
-        // NIP pendek: format 10 digit numerik unik
-        $nipPendek = (string) $this->faker->unique()->numerify('##########');
+        // NIP pendek: format 9 digit numerik unik (kolom users.nip_pendek = 9)
+        $nipPendek = (string) $this->faker->unique()->numerify('#########');
 
         return [
             'nip_pendek'   => $nipPendek,
@@ -42,7 +42,7 @@ class UserFactory extends Factory
                 'Seksi Pelayanan',
             ]),
             'password'     => static::$password ??= Hash::make('password'),
-            'role'         => UserRole::Pegawai,
+            'jabatan'      => UserRole::Pegawai->value,
             'remember_token' => Str::random(10),
         ];
     }
@@ -57,7 +57,7 @@ class UserFactory extends Factory
     public function administrator(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'role' => UserRole::Administrator,
+            'jabatan' => UserRole::Administrator->value,
         ]);
     }
 
@@ -67,7 +67,7 @@ class UserFactory extends Factory
     public function kepalaKantor(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'role' => UserRole::KepalaKantor,
+            'jabatan' => UserRole::KepalaKantor->value,
         ]);
     }
 
@@ -77,7 +77,7 @@ class UserFactory extends Factory
     public function pegawai(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'role' => UserRole::Pegawai,
+            'jabatan' => UserRole::Pegawai->value,
         ]);
     }
 }
