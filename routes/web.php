@@ -151,6 +151,12 @@ Route::middleware(['auth'])
         Route::get('/peminjaman/riwayat', \App\Livewire\Peminjaman\Riwayat::class)->name('peminjaman.riwayat');
 
         /**
+         * Peminjaman Ruangan — pengajuan pegawai & persetujuan (Administrator / Subbag Umum)
+         */
+        Route::get('/ruangan/peminjaman', \App\Livewire\Ruangan\Index::class)->name('ruangan.peminjaman');
+        Route::get('/ruangan/persetujuan', \App\Livewire\Ruangan\Index::class)->defaults('mode', 'reviewer')->name('ruangan.persetujuan');
+
+        /**
          * BONA — Bon ATK (Permintaan)
          */
         Route::get('/bona/permohonan', \App\Livewire\Bona\Permohonan::class)->name('bona.permohonan');

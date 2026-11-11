@@ -133,6 +133,17 @@
                 </div>
                 @endif
 
+                <!-- Ruangan -->
+                @if(auth()->user()->canAccessPeminjaman())
+                <div class="pt-2 border-t border-slate-100">
+                    <p class="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Peminjaman Ruangan</p>
+                    <a wire:navigate.hover href="{{ route('ruangan.peminjaman') }}" @click="closeMobileDrawer()"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 text-xs transition text-left font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700">
+                        <span>Ajukan Peminjaman Ruangan</span>
+                    </a>
+                </div>
+                @endif
+
                 <!-- Category 2: Permisi -->
                 @if(auth()->user()->canAccessPermohonanPermisi() || auth()->user()->canAccessPersetujuanPermisi())
                 <div class="pt-2 border-t border-slate-100">
