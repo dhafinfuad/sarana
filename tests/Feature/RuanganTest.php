@@ -316,4 +316,30 @@ class RuanganTest extends TestCase
 
         $this->assertDatabaseMissing('room_bookings', ['id' => $b->id]);
     }
+    public function test_persetujuan_kpi_cards_count_by_status_and_filter_on_click(): void
+    {
+        $room = $this->room();
+        $u = $this->pegawai();
+        $t = fn (int $h) => now()->addDay()->setTime($h, 0);
+        $this->booking($room, $u, $t(8), $t(9), 'pending');
+        $this->booking($room, $u, $t(10), $t(11), 'pending');
+        $this->booking($room, $u, $t(12), $t(13), 'disetujui');
+        $this->booking($room, $u, $t(14), $t(15), 'ditolak');
+        $this->booking($room, $u, $t(16), $t(17), 'dibatalkan');
+
+        $c = Livewire::actingAs($this->admin())->test(Index::class, ['mode' => 'reviewer']);
+        $this->assertSame(
+            ['total' => 5, 'pending' => 2, 'disetujui' => 1, 'ditolak' => 1],
+            $c->instance()->analytics()
+        );
+        $c->assertSee('TOTAL PENGAJUAN')->assertSee('DISETUJUI')->assertSee('DITOLAK');
+
+        $c->set('status', 'pending');
+        $this->assertCount(2, $c->instance()->bookings());
+    }
+
+    public function test_kpi_cards_are_not_shown_on_peminjaman_page(): void
+    {
+        Livewire::actingAs($this->pegawai())->test(Index::class)->assertDontSee('TOTAL PENGAJUAN');
+    }
 }

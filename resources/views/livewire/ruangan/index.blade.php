@@ -82,6 +82,75 @@
             </div>
         @endif
 
+        @if($isReviewerMode)
+        <!-- 4 Metric Cards untuk Persetujuan Ruangan -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" wire:poll.15s>
+            <!-- Card 1: Total Pengajuan -->
+            <button type="button" wire:click="$set('status', '')"
+                class="text-left bg-white rounded-3xl p-4 sm:p-5 border transition-all duration-200 shadow-card hover:shadow-lg cursor-pointer relative overflow-hidden group flex items-center justify-between gap-2 sm:gap-3 {{ $status === '' ? 'border-brand-500 ring-2 ring-brand-500/20' : 'border-slate-200/90 hover:border-slate-300' }}">
+                <div class="min-w-0 flex-1">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">TOTAL PENGAJUAN</p>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 tracking-tight">
+                        {{ number_format($this->analytics['total'] ?? 0) }}
+                    </p>
+                </div>
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 border border-brand-100 transition-transform duration-200 group-hover:scale-105">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+            </button>
+
+            <!-- Card 2: Pending -->
+            <button type="button" wire:click="$set('status', 'pending')"
+                class="text-left bg-white rounded-3xl p-4 sm:p-5 border transition-all duration-200 shadow-card hover:shadow-lg cursor-pointer relative overflow-hidden group flex items-center justify-between gap-2 sm:gap-3 {{ $status === 'pending' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-200/90 hover:border-slate-300' }}">
+                <div class="min-w-0 flex-1">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">PENDING</p>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-2 tracking-tight">
+                        {{ number_format($this->analytics['pending'] ?? 0) }}
+                    </p>
+                </div>
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100 transition-transform duration-200 group-hover:scale-105">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </button>
+
+            <!-- Card 3: Disetujui -->
+            <button type="button" wire:click="$set('status', 'disetujui')"
+                class="text-left bg-white rounded-3xl p-4 sm:p-5 border transition-all duration-200 shadow-card hover:shadow-lg cursor-pointer relative overflow-hidden group flex items-center justify-between gap-2 sm:gap-3 {{ $status === 'disetujui' ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200/90 hover:border-slate-300' }}">
+                <div class="min-w-0 flex-1">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">DISETUJUI</p>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-2 tracking-tight">
+                        {{ number_format($this->analytics['disetujui'] ?? 0) }}
+                    </p>
+                </div>
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 transition-transform duration-200 group-hover:scale-105">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+            </button>
+
+            <!-- Card 4: Ditolak -->
+            <button type="button" wire:click="$set('status', 'ditolak')"
+                class="text-left bg-white rounded-3xl p-4 sm:p-5 border transition-all duration-200 shadow-card hover:shadow-lg cursor-pointer relative overflow-hidden group flex items-center justify-between gap-2 sm:gap-3 {{ $status === 'ditolak' ? 'border-rose-500 ring-2 ring-rose-500/20' : 'border-slate-200/90 hover:border-slate-300' }}">
+                <div class="min-w-0 flex-1">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">DITOLAK</p>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-rose-600 mt-2 tracking-tight">
+                        {{ number_format($this->analytics['ditolak'] ?? 0) }}
+                    </p>
+                </div>
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-100 transition-transform duration-200 group-hover:scale-105">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+            </button>
+        </div>
+        @endif
+
         <!-- Filters Bar -->
         <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card mb-8">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 items-end">
