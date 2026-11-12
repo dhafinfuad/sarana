@@ -77,6 +77,27 @@ class Index extends Component
         return Room::orderBy('nama')->get();
     }
 
+    /**
+     * Ringkasan jumlah pengajuan untuk kartu KPI di halaman Persetujuan.
+     *
+     * @return array{total: int, pending: int, disetujui: int, ditolak: int}
+     */
+    #[Computed]
+    public function analytics(): array
+    {
+        $counts = RoomBooking::query()
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return [
+            'total'     => (int) $counts->sum(),
+            'pending'   => (int) ($counts['pending'] ?? 0),
+            'disetujui' => (int) ($counts['disetujui'] ?? 0),
+            'ditolak'   => (int) ($counts['ditolak'] ?? 0),
+        ];
+    }
+
     #[Computed]
     public function bookings(): LengthAwarePaginator
     {
