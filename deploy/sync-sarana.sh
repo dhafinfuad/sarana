@@ -10,7 +10,7 @@ export GIT_SSH_COMMAND="ssh -i /home/administrator/.ssh/id_ed25519 -p 443 -o Str
 # GANTI: pengaturan untuk repo ini
 SITE_DIR="/opt/1panel/apps/openresty/openresty/www/sites/sarana"      # folder repo di server
 BRANCH="main"                                                          # branch yang di-deploy
-CONTAINER_NAME="1Panel-php8-XXXX"                                      # container PHP (cek: docker ps)
+CONTAINER_NAME="1Panel-php8-LCJZ"                                      # container PHP
 APP_DIR_IN_CONTAINER="/www/sites/sarana"                               # path folder yang sama di dalam container
 LOG_FILE="/home/administrator/scripts/sync-sarana.log"                 # log terpisah per repo
 
