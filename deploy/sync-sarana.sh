@@ -8,10 +8,10 @@ export GIT_CONFIG_GLOBAL="/home/administrator/.gitconfig"
 export GIT_SSH_COMMAND="ssh -i /home/administrator/.ssh/id_ed25519 -p 443 -o StrictHostKeyChecking=no"
 
 # GANTI: pengaturan untuk repo ini
-SITE_DIR="/opt/1panel/apps/openresty/openresty/www/sites/sarana"      # folder repo di server
+SITE_DIR="/opt/1panel/apps/openresty/openresty/www/sites/sarana/index"  # folder repo di server
 BRANCH="main"                                                          # branch yang di-deploy
 CONTAINER_NAME="1Panel-php8-LCJZ"                                      # container PHP
-APP_DIR_IN_CONTAINER="/www/sites/sarana"                               # path folder yang sama di dalam container
+APP_DIR_IN_CONTAINER="/www/sites/sarana/index"                         # path folder yang sama di dalam container
 LOG_FILE="/home/administrator/scripts/sync-sarana.log"                 # log terpisah per repo
 
 # Cegah dua proses berjalan bersamaan untuk repo yang sama
@@ -59,14 +59,18 @@ fi
 
 # 3) Build aset front-end (public/build di-.gitignore, jadi harus dibuild di server).
 #    Dijalankan jika package*.json, vite/tailwind config, atau resources/ berubah.
+#    Memakai container Node sekali pakai, jadi Node tidak perlu terpasang di host.
+#    Vite dipanggil lewat node langsung karena node_modules/.bin/vite tidak punya izin eksekusi.
 if echo "$CHANGED" | grep -qE '^(package(-lock)?\.json|vite\.config\.js|tailwind\.config\.js|resources/(css|js|views)/)'; then
-    if command -v npm >/dev/null 2>&1; then
-        log "npm ci && npm run build..."
-        (npm ci --no-audit --no-fund && npm run build) 2>&1 | tee -a "$LOG_FILE"
-        [ "${PIPESTATUS[0]}" -eq 0 ] || log "PERINGATAN: build aset gagal"
-    else
-        log "PERINGATAN: npm tidak ditemukan di host; build aset dilewati (jalankan 'npm run build' manual)."
+    BUILD_CMD="node node_modules/vite/bin/vite.js build"
+    # Pasang ulang dependensi hanya jika package*.json berubah (--no-save: lock file tidak ditulis ulang)
+    if echo "$CHANGED" | grep -qE '^package(-lock)?\.json$'; then
+        BUILD_CMD="npm install --no-save --no-audit --no-fund && $BUILD_CMD"
     fi
+    log "build aset (docker node:22)..."
+    docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+        -v "$SITE_DIR":/app -w /app node:22 sh -c "$BUILD_CMD" 2>&1 | tee -a "$LOG_FILE"
+    [ "${PIPESTATUS[0]}" -eq 0 ] || log "PERINGATAN: build aset gagal"
 fi
 
 # 4) Bersihkan cache Laravel
