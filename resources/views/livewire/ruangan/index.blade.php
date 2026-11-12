@@ -46,7 +46,7 @@
                         {{ $isReviewerMode ? 'Persetujuan Peminjaman Ruangan' : 'Peminjaman Ruangan' }}
                     </h1>
                     <p class="text-slate-500 text-sm mt-1.5">
-                        {{ $isReviewerMode ? 'Setujui atau tolak pengajuan peminjaman ruangan pegawai.' : 'Ajukan peminjaman ruangan rapat dan lihat riwayat pengajuan Anda.' }}
+                        {{ $isReviewerMode ? 'Real-time analytics dan persetujuan peminjaman ruangan kantor.' : 'Ajukan peminjaman ruangan rapat dan lihat riwayat pengajuan Anda.' }}
                     </p>
                 </div>
 
@@ -92,204 +92,150 @@
         @endif
 
         @if($isReviewerMode)
-        <!-- 4 Metric Cards untuk Persetujuan Ruangan -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" wire:poll.15s>
-            <!-- Card 1: Total Pengajuan -->
-            <button type="button" wire:click="$set('status', '')"
-                class="text-left bg-white rounded-3xl p-4 sm:p-5 border transition-all duration-200 shadow-card hover:shadow-lg cursor-pointer relative overflow-hidden group flex items-center justify-between gap-2 sm:gap-3 {{ $status === '' ? 'border-brand-500 ring-2 ring-brand-500/20' : 'border-slate-200/90 hover:border-slate-300' }}">
-                <div class="min-w-0 flex-1">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">TOTAL PENGAJUAN</p>
-                    <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 tracking-tight">
-                        {{ number_format($this->analytics['total'] ?? 0) }}
-                    </p>
-                </div>
-                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 border border-brand-100 transition-transform duration-200 group-hover:scale-105">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                </div>
-            </button>
-
-            <!-- Card 2: Pending -->
-            <button type="button" wire:click="$set('status', 'pending')"
-                class="text-left bg-white rounded-3xl p-4 sm:p-5 border transition-all duration-200 shadow-card hover:shadow-lg cursor-pointer relative overflow-hidden group flex items-center justify-between gap-2 sm:gap-3 {{ $status === 'pending' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-200/90 hover:border-slate-300' }}">
-                <div class="min-w-0 flex-1">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">PENDING</p>
-                    <p class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-2 tracking-tight">
-                        {{ number_format($this->analytics['pending'] ?? 0) }}
-                    </p>
-                </div>
-                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100 transition-transform duration-200 group-hover:scale-105">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-            </button>
-
-            <!-- Card 3: Disetujui -->
-            <button type="button" wire:click="$set('status', 'disetujui')"
-                class="text-left bg-white rounded-3xl p-4 sm:p-5 border transition-all duration-200 shadow-card hover:shadow-lg cursor-pointer relative overflow-hidden group flex items-center justify-between gap-2 sm:gap-3 {{ $status === 'disetujui' ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200/90 hover:border-slate-300' }}">
-                <div class="min-w-0 flex-1">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">DISETUJUI</p>
-                    <p class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-2 tracking-tight">
-                        {{ number_format($this->analytics['disetujui'] ?? 0) }}
-                    </p>
-                </div>
-                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 transition-transform duration-200 group-hover:scale-105">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-            </button>
-
-            <!-- Card 4: Ditolak -->
-            <button type="button" wire:click="$set('status', 'ditolak')"
-                class="text-left bg-white rounded-3xl p-4 sm:p-5 border transition-all duration-200 shadow-card hover:shadow-lg cursor-pointer relative overflow-hidden group flex items-center justify-between gap-2 sm:gap-3 {{ $status === 'ditolak' ? 'border-rose-500 ring-2 ring-rose-500/20' : 'border-slate-200/90 hover:border-slate-300' }}">
-                <div class="min-w-0 flex-1">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">DITOLAK</p>
-                    <p class="text-2xl sm:text-3xl font-extrabold text-rose-600 mt-2 tracking-tight">
-                        {{ number_format($this->analytics['ditolak'] ?? 0) }}
-                    </p>
-                </div>
-                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-100 transition-transform duration-200 group-hover:scale-105">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </div>
-            </button>
+        <!-- 4 Modern Metric KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8" wire:poll.15s>
+            <x-persetujuan.kpi-total label="Total Peminjaman" :value="$this->analytics['total']">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            </x-persetujuan.kpi-total>
+            <x-persetujuan.kpi-top label="Top Ruangan" :item="$this->analytics['topRoom']" unit="peminjaman" :chip="$this->analytics['topRoom'] ? 'Kap. ' . $this->analytics['topRoom']->kapasitas : null">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </x-persetujuan.kpi-top>
+            <x-persetujuan.kpi-top label="Top Seksi" :item="$this->analytics['topSeksi']" unit="peminjaman ruangan" accent="bg-sky-50 text-sky-600 border-sky-100" :small="true">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            </x-persetujuan.kpi-top>
+            <x-persetujuan.kpi-top label="Top Pegawai" :item="$this->analytics['topPegawai']" unit="kali peminjaman" accent="bg-purple-50 text-purple-600 border-purple-100">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            </x-persetujuan.kpi-top>
         </div>
 
-        <!-- Filters Bar -->
-        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card mb-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 items-end">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Pencarian</label>
-                    <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                            <span class="material-symbols-outlined text-[18px]">search</span>
-                        </div>
-                        <input type="text" wire:model.live.debounce.300ms="search"
-                            placeholder="Cari Ruangan / Keperluan{{ $isReviewerMode ? ' / Pegawai' : '' }}..."
-                            class="w-full bg-slate-50/60 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs font-medium text-slate-800 placeholder-slate-400 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Status</label>
-                    <select wire:model.live="status"
-                        class="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all">
-                        <option value="">Semua Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="disetujui">Disetujui</option>
-                        <option value="ditolak">Ditolak</option>
-                        <option value="dibatalkan">Dibatalkan</option>
-                    </select>
-                </div>
+        <x-persetujuan.filter-card title="Manajemen Peminjaman Ruangan" :pending="$this->analytics['pending']"
+            :statuses="['pending' => 'Pending', 'disetujui' => 'Disetujui', 'ditolak' => 'Ditolak', 'dibatalkan' => 'Dibatalkan']"
+            placeholder="Cari Pegawai, Ruangan, atau Keperluan..."
+            reset="$set('search', ''); $set('status', ''); $set('startDate', ''); $set('endDate', '');" />
+
+        <!-- Room Booking Approval Table -->
+        <div class="bg-white rounded-3xl border border-slate-200/90 shadow-card overflow-hidden relative">
+            <div wire:loading.flex class="absolute inset-0 bg-white/70 backdrop-blur-xs z-10 items-center justify-center">
+                <span class="material-symbols-outlined animate-spin text-brand-600 text-3xl">sync</span>
             </div>
-        </div>
 
-        <!-- Table -->
-        <div class="bg-white rounded-3xl border border-slate-200/90 shadow-card overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
+            <!-- Desktop Table View -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs table-fixed">
                     <thead>
-                        <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
-                            @if($isReviewerMode)<th class="py-3.5 px-6 whitespace-nowrap">Pemohon</th>@endif
-                            <th class="py-3.5 px-4 whitespace-nowrap {{ $isReviewerMode ? '' : 'px-6' }}">Ruangan</th>
-                            <th class="py-3.5 px-4">Keperluan</th>
-                            <th class="py-3.5 px-4 whitespace-nowrap">Waktu</th>
-                            <th class="py-3.5 px-4 text-center whitespace-nowrap">Status</th>
-                            <th class="py-3.5 px-6 text-center whitespace-nowrap">Aksi</th>
+                        <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+                            <x-persetujuan.sort-th :sort="$sortField" :dir="$sortDirection" field="user.name" width="w-[16%]">Pegawai</x-persetujuan.sort-th>
+                            <x-persetujuan.sort-th :sort="$sortField" :dir="$sortDirection" field="room.nama" width="w-[15%]">Ruangan</x-persetujuan.sort-th>
+                            <x-persetujuan.sort-th :sort="$sortField" :dir="$sortDirection" field="keperluan" width="w-[21%]">Keperluan</x-persetujuan.sort-th>
+                            <x-persetujuan.sort-th :sort="$sortField" :dir="$sortDirection" field="tanggal_mulai" width="w-[11%]">Mulai</x-persetujuan.sort-th>
+                            <x-persetujuan.sort-th :sort="$sortField" :dir="$sortDirection" field="tanggal_selesai" width="w-[11%]">Selesai</x-persetujuan.sort-th>
+                            <x-persetujuan.sort-th :sort="$sortField" :dir="$sortDirection" field="status" width="w-[11%]" :center="true">Status</x-persetujuan.sort-th>
+                            <th class="w-[15%] py-3 px-2 text-center">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100" wire:poll.15s>
+                    <tbody class="divide-y divide-slate-100">
                         @forelse($this->bookings as $row)
+                            @php $badge = \App\Support\StatusBadge::admin($row->status); $nama = $row->user->name ?? 'Pengguna Dihapus'; @endphp
                             <tr class="hover:bg-slate-50/60 transition-colors" wire:key="booking-{{ $row->id }}">
-                                @if($isReviewerMode)
-                                    <td class="py-4 px-6">
-                                        <p class="font-bold text-slate-900">{{ $row->user->name }}</p>
-                                        @if($row->user->seksi)<p class="text-[10px] text-slate-400 mt-0.5">{{ $row->user->seksi }}</p>@endif
-                                    </td>
-                                @endif
-                                <td class="py-4 {{ $isReviewerMode ? 'px-4' : 'px-6' }}">
-                                    <p class="font-bold text-slate-900">{{ $row->room->nama }}</p>
-                                    <p class="text-[10px] text-slate-400 mt-0.5">{{ $row->jumlah_peserta }} peserta</p>
+                                <td class="py-3 px-3 min-w-0">
+                                    <p class="font-bold text-slate-900 leading-snug truncate" title="{{ $nama }}">{{ $nama }}</p>
+                                    <p class="text-[10px] text-slate-400 font-medium mt-0.5 leading-tight truncate" title="{{ $row->user->seksi ?? 'Seksi tidak diketahui' }}">{{ $row->user->seksi ?? 'Seksi tidak diketahui' }}</p>
                                 </td>
-                                <td class="py-4 px-4 text-slate-700">{{ $row->keperluan }}</td>
-                                <td class="py-4 px-4 whitespace-nowrap text-slate-500 font-medium">
-                                    {{ $row->tanggal_mulai->translatedFormat('d M Y H:i') }}
-                                    <span class="block text-[10px] text-slate-400 mt-0.5">s.d. {{ $row->tanggal_selesai->translatedFormat('d M Y H:i') }}</span>
+                                <td class="py-3 px-3 min-w-0">
+                                    <p class="font-bold text-slate-800 leading-snug truncate" title="{{ $row->room->nama }}">{{ $row->room->nama }}</p>
+                                    <div class="mt-0.5">
+                                        <span class="inline-flex px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 font-mono">{{ $row->jumlah_peserta }} orang</span>
+                                    </div>
                                 </td>
-                                <td class="py-4 px-4 text-center whitespace-nowrap">
-                                    @php
-                                        $statusClasses = [
-                                            'pending' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                            'disetujui' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                            'ditolak' => 'bg-rose-50 text-rose-700 border-rose-200',
-                                            'dibatalkan' => 'bg-slate-100 text-slate-600 border-slate-200',
-                                        ];
-                                        $pillClass = $statusClasses[$row->status] ?? 'bg-slate-100 text-slate-600 border-slate-200';
-                                    @endphp
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border {{ $pillClass }}">
-                                        {{ ucfirst($row->status) }}
+                                <td class="py-3 px-3 min-w-0" title="{{ $row->keperluan }}">
+                                    <p class="text-slate-600 text-xs leading-relaxed break-words whitespace-normal">{{ $row->keperluan }}</p>
+                                </td>
+                                <td class="py-3 px-2 text-slate-600 whitespace-nowrap text-[11px] font-medium">{{ $row->tanggal_mulai->format('d M Y') }}<span class="block text-[10px] text-slate-400">{{ $row->tanggal_mulai->format('H:i') }}</span></td>
+                                <td class="py-3 px-2 text-slate-600 whitespace-nowrap text-[11px] font-medium">{{ $row->tanggal_selesai->format('d M Y') }}<span class="block text-[10px] text-slate-400">{{ $row->tanggal_selesai->format('H:i') }}</span></td>
+                                <td class="py-3 px-2 text-center whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $badge['bg'] }}">
+                                        <span class="w-1.5 h-1.5 rounded-full {{ $badge['dot'] }}"></span>
+                                        {{ $badge['label'] }}
                                     </span>
                                     @if($row->processor)
-                                        <div class="text-[10px] text-slate-400 mt-1 text-center truncate max-w-[130px] mx-auto" title="Diproses oleh: {{ $row->processor->name }} ({{ $row->processed_at ? $row->processed_at->format('d M Y H:i') : '' }})">
-                                            Oleh: {{ \Illuminate\Support\Str::limit($row->processor->name, 14) }}
-                                        </div>
+                                        <div class="text-[10px] text-slate-400 mt-1 truncate" title="Diproses oleh: {{ $row->processor->name }}">Oleh: {{ \Illuminate\Support\Str::limit($row->processor->name, 12) }}</div>
                                     @endif
                                 </td>
                                 <td class="py-3 px-1.5 text-center whitespace-nowrap">
                                     <div class="inline-flex items-center justify-center gap-0.5">
-                                        @if($isReviewerMode)
-                                            {{-- Setuju --}}
-                                            <button type="button" @if($row->can_approve) @click="openConfirm('approve', {{ $row->id }}, 'Setujui Peminjaman', 'Apakah Anda yakin ingin menyetujui peminjaman ruangan ini?')" @else disabled @endif
-                                                @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 cursor-pointer' => $row->can_approve, 'text-slate-300 cursor-not-allowed' => !$row->can_approve])
-                                                title="{{ $row->can_approve ? 'Setujui Peminjaman' : 'Tidak dapat disetujui pada status ini' }}">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                                            </button>
-                                            {{-- Tolak --}}
-                                            <button type="button" @if($row->can_reject) @click="openConfirm('reject', {{ $row->id }}, 'Tolak Peminjaman', 'Apakah Anda yakin ingin menolak peminjaman ruangan ini?')" @else disabled @endif
-                                                @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-rose-600 hover:bg-rose-50 hover:border-rose-200 cursor-pointer' => $row->can_reject, 'text-slate-300 cursor-not-allowed' => !$row->can_reject])
-                                                title="{{ $row->can_reject ? 'Tolak Peminjaman' : 'Tidak dapat ditolak pada status ini' }}">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                            </button>
-                                        @else
-                                            {{-- Batalkan (pemohon) --}}
-                                            <button type="button" @if($row->can_cancel) @click="openConfirm('cancel', {{ $row->id }}, 'Batalkan Peminjaman', 'Apakah Anda yakin ingin membatalkan pengajuan peminjaman ruangan ini?')" @else disabled @endif
-                                                @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-rose-600 hover:bg-rose-50 hover:border-rose-200 cursor-pointer' => $row->can_cancel, 'text-slate-300 cursor-not-allowed' => !$row->can_cancel])
-                                                title="{{ $row->can_cancel ? 'Batalkan Peminjaman' : 'Hanya pengajuan Pending yang dapat dibatalkan' }}">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                                            </button>
-                                        @endif
-                                        {{-- Edit --}}
-                                        <button type="button" @if($row->can_edit) wire:click="edit({{ $row->id }})" @else disabled @endif
-                                            @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-amber-600 hover:bg-amber-50 hover:border-amber-200 cursor-pointer' => $row->can_edit, 'text-slate-300 cursor-not-allowed' => !$row->can_edit])
-                                            title="{{ $row->can_edit ? 'Edit Peminjaman' : 'Hanya pengajuan Pending yang dapat diedit' }}">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                        </button>
-                                        {{-- Hapus --}}
-                                        <button type="button" @if($row->can_delete) @click="openConfirm('delete', {{ $row->id }}, 'Hapus Peminjaman', 'Apakah Anda yakin ingin menghapus data peminjaman ini? Tindakan ini tidak dapat dibatalkan.')" @else disabled @endif
-                                            @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 cursor-pointer' => $row->can_delete, 'text-slate-300 cursor-not-allowed' => !$row->can_delete])
-                                            title="{{ $row->can_delete ? 'Hapus Peminjaman' : 'Hanya pengajuan Ditolak/Dibatalkan yang dapat dihapus' }}">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
+                                        <x-persetujuan.action type="approve" :disabled="!$row->can_approve" @click="openConfirm('approve', {{ $row->id }}, 'Konfirmasi Persetujuan', 'Setujui peminjaman ruangan untuk: {{ addslashes($nama) }}?')" />
+                                        <x-persetujuan.action type="reject" :disabled="!$row->can_reject" @click="openConfirm('reject', {{ $row->id }}, 'Konfirmasi Penolakan', 'Tolak peminjaman ruangan untuk: {{ addslashes($nama) }}?')" />
+                                        <x-persetujuan.action type="edit" :disabled="!$row->can_edit" wire:click="edit({{ $row->id }})" />
+                                        <x-persetujuan.action type="delete" :disabled="!$row->can_delete" @click="openConfirm('delete', {{ $row->id }}, 'Konfirmasi Hapus Data', 'Hapus data peminjaman ruangan {{ addslashes($nama) }} secara permanen?')" />
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ $isReviewerMode ? 6 : 5 }}" class="py-16 text-center">
-                                    <span class="material-symbols-outlined text-[48px] text-slate-300 mb-2 block">meeting_room</span>
-                                    <p class="text-slate-500 font-semibold text-sm">Belum ada data peminjaman ruangan.</p>
+                                <td colspan="7" class="py-12 text-center text-slate-400">
+                                    <div class="flex flex-col items-center">
+                                        <svg class="w-12 h-12 text-slate-300 mb-2 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                                        <p>Tidak ada data peminjaman ruangan yang ditemukan.</p>
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+
+            <!-- Mobile Card View -->
+            <div class="block md:hidden space-y-3 p-4">
+                @forelse($this->bookings as $row)
+                    @php $badge = \App\Support\StatusBadge::admin($row->status); $nama = $row->user->name ?? 'Pengguna Dihapus'; @endphp
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs flex flex-col gap-3" wire:key="booking-card-{{ $row->id }}">
+                        <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-bold text-slate-900 text-sm leading-tight truncate" title="{{ $nama }}">{{ $nama }}</h4>
+                                <p class="text-[11px] text-slate-400 font-medium mt-0.5 truncate">{{ $row->user->seksi ?? 'Seksi tidak diketahui' }}</p>
+                            </div>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border shrink-0 {{ $badge['bg'] }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $badge['dot'] }}"></span>
+                                {{ $badge['label'] }}
+                            </span>
+                        </div>
+                        <div class="bg-slate-50/70 p-2.5 rounded-xl border border-slate-100 text-xs">
+                            <p class="text-slate-400 font-bold uppercase text-[10px] tracking-wider mb-0.5">Ruangan</p>
+                            <p class="font-bold text-slate-800 text-xs truncate">{{ $row->room->nama }}</p>
+                            <span class="inline-flex px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 font-mono mt-1">{{ $row->jumlah_peserta }} orang</span>
+                        </div>
+                        <div class="bg-slate-50/70 p-2.5 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
+                            <div>
+                                <p class="text-slate-400 font-bold uppercase text-[10px] tracking-wider">Mulai</p>
+                                <p class="font-semibold text-slate-700 text-xs mt-0.5">{{ $row->tanggal_mulai->format('d M Y H:i') }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-slate-400 font-bold uppercase text-[10px] tracking-wider">Selesai</p>
+                                <p class="font-semibold text-slate-700 text-xs mt-0.5">{{ $row->tanggal_selesai->format('d M Y H:i') }}</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50/70 p-2.5 rounded-xl border border-slate-100 text-xs">
+                            <p class="text-slate-400 font-bold uppercase text-[10px] tracking-wider mb-0.5">Keperluan:</p>
+                            <p class="text-slate-700 leading-relaxed">{{ $row->keperluan }}</p>
+                        </div>
+                        <div class="flex items-center justify-end gap-0.5 pt-2 border-t border-slate-100">
+                            <x-persetujuan.action type="approve" :disabled="!$row->can_approve" @click="openConfirm('approve', {{ $row->id }}, 'Konfirmasi Persetujuan', 'Setujui peminjaman ruangan untuk: {{ addslashes($nama) }}?')" />
+                            <x-persetujuan.action type="reject" :disabled="!$row->can_reject" @click="openConfirm('reject', {{ $row->id }}, 'Konfirmasi Penolakan', 'Tolak peminjaman ruangan untuk: {{ addslashes($nama) }}?')" />
+                            <x-persetujuan.action type="edit" :disabled="!$row->can_edit" wire:click="edit({{ $row->id }})" />
+                            <x-persetujuan.action type="delete" :disabled="!$row->can_delete" @click="openConfirm('delete', {{ $row->id }}, 'Konfirmasi Hapus Data', 'Hapus data peminjaman ruangan {{ addslashes($nama) }} secara permanen?')" />
+                        </div>
+                    </div>
+                @empty
+                    <div class="py-12 text-center text-slate-400">
+                        <svg class="w-12 h-12 text-slate-300 mb-2 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                        <p class="text-xs">Tidak ada data peminjaman ruangan yang ditemukan.</p>
+                    </div>
+                @endforelse
+            </div>
+
             @if($this->bookings->hasPages())
-                <div class="px-6 py-4 border-t border-slate-100">
-                    {{ $this->bookings->links(data: ['scrollTo' => false]) }}
+                <div class="p-4 border-t border-slate-100 bg-slate-50/50">
+                    {{ $this->bookings->links() }}
                 </div>
             @endif
         </div>

@@ -147,4 +147,33 @@ class PermisiRiwayatTest extends TestCase
     {
         $this->actingAs($this->user('Kepala Kantor'))->get('/permisi/riwayat')->assertForbidden();
     }
+    public function test_persetujuan_page_has_dashboard_layout_and_kpi_follow_filters(): void
+    {
+        $admin = $this->user('Administrator');
+        $a = $this->user('Pelaksana');
+        $b = $this->user('Pelaksana');
+        $b->update(['seksi' => 'Seksi Umum']);
+        $this->permisi($a, 'pending', 1);
+        $this->permisi($a, 'disetujui', 2);
+        $this->permisi($a, 'disetujui', 3);
+        $this->permisi($b, 'ditolak', 4)->update(['kategori' => 'Kesehatan']);
+
+        $this->actingAs($admin)->get('/permisi/persetujuan')->assertOk()
+            ->assertSee('Total Permohonan')->assertSee('Top Kategori')->assertSee('Top Seksi')->assertSee('Top Pegawai')
+            ->assertSee('Manajemen Permohonan Izin')->assertSee('1 Menunggu')->assertDontSee('TOTAL PERMOHONAN');
+
+        $c = Livewire::actingAs($admin)->test(Dashboard::class)->set('isReviewerMode', true);
+        $k = $c->instance()->analytics();
+        $this->assertSame(4, $k['total']);
+        $this->assertSame(['Kantor', 3], [$k['topKategori']->name, (int) $k['topKategori']->total]);
+        $this->assertSame(['Seksi Pelayanan', 3], [$k['topSeksi']->name, (int) $k['topSeksi']->total]);
+        $this->assertSame($a->name, $k['topPegawai']->name);
+        $this->assertSame(1, $k['pending']);
+
+        $c->set('status', 'ditolak');
+        $k = $c->instance()->analytics();
+        $this->assertSame(1, $k['total']);
+        $this->assertSame('Kesehatan', $k['topKategori']->name);
+        $this->assertSame(1, $k['pending']);
+    }
 }
