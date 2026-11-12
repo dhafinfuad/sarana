@@ -98,6 +98,24 @@ class Index extends Component
         ];
     }
 
+    /**
+     * Ringkasan pengajuan milik pemohon untuk kartu Overview Status.
+     *
+     * @return array{pending: int, disetujui: int, gagal: int}
+     */
+    #[Computed]
+    public function overview(): array
+    {
+        $c = RoomBooking::where('user_id', Auth::user()->id)
+            ->selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
+
+        return [
+            'pending'   => (int) ($c['pending'] ?? 0),
+            'disetujui' => (int) ($c['disetujui'] ?? 0),
+            'gagal'     => (int) (($c['ditolak'] ?? 0) + ($c['dibatalkan'] ?? 0)),
+        ];
+    }
+
     #[Computed]
     public function bookings(): LengthAwarePaginator
     {

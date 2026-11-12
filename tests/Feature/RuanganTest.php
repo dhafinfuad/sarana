@@ -342,4 +342,20 @@ class RuanganTest extends TestCase
     {
         Livewire::actingAs($this->pegawai())->test(Index::class)->assertDontSee('TOTAL PENGAJUAN');
     }
+    public function test_pemohon_overview_counts_only_own_bookings(): void
+    {
+        $room = $this->room();
+        $me = $this->pegawai();
+        $other = $this->pegawai();
+        $t = fn (int $h) => now()->addDay()->setTime($h, 0);
+        $this->booking($room, $me, $t(8), $t(9), 'pending');
+        $this->booking($room, $me, $t(10), $t(11), 'disetujui');
+        $this->booking($room, $me, $t(12), $t(13), 'ditolak');
+        $this->booking($room, $me, $t(14), $t(15), 'dibatalkan');
+        $this->booking($room, $other, $t(16), $t(17), 'pending');
+
+        $c = Livewire::actingAs($me)->test(Index::class);
+        $this->assertSame(['pending' => 1, 'disetujui' => 1, 'gagal' => 2], $c->instance()->overview());
+        $c->assertSee('Overview Status Peminjaman')->assertSee('Riwayat Peminjaman')->assertDontSee('TOTAL PENGAJUAN');
+    }
 }
