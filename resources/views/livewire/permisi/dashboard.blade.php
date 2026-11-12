@@ -1,5 +1,6 @@
 <div x-data="{
     showApplicationModal: false,
+    showExportModal: false,
     showDetailModal: false,
     detail: {},
     showEditModal: false,
@@ -56,15 +57,8 @@
                     </p>
                 </div>
 
-                @if(!$isReviewerMode)
-                    <div class="flex items-center gap-2.5 self-start sm:self-auto">
-                        <button @click="showApplicationModal = true"
-                            class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs shadow-md shadow-brand-600/25 hover:shadow-brand-600/35 transition flex items-center gap-2 cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                            <span>Pengajuan Izin</span>
-                        </button>
-                    </div>
-                @endif
+                <x-persetujuan.header-actions :create="auth()->user()->canAccessPermohonanPermisi()" create-label="Permohonan" create-action="showApplicationModal = true"
+                    :export="auth()->user()->isSubbagUmum() || auth()->user()->isAdministrator()" />
             </div>
         @else
         <div class="mb-8">
@@ -371,94 +365,89 @@
     </div>
 
     <!-- Modal Form Pengajuan -->
-    @if(!$isReviewerMode)
-        <x-modal show="showApplicationModal" maxWidth="max-w-lg">
-            <x-slot:header>
-                <div class="flex justify-between items-center w-full">
-                    <h2 class="text-base font-bold text-slate-900">Form Pengajuan Permisi</h2>
-                    <button @click="showApplicationModal = false" type="button"
-                        class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none transition-colors cursor-pointer">
-                        &times;
-                    </button>
-                </div>
-            </x-slot:header>
+    @if(auth()->user()->canAccessPermohonanPermisi())
+    <x-modal show="showApplicationModal" maxWidth="max-w-lg">
+        <x-slot:header>
+            <div class="flex items-center justify-between w-full">
+                <h3 class="text-base font-bold text-slate-900">Form Pengajuan Permohonan Izin</h3>
+                <button @click="showApplicationModal = false" type="button" class="text-slate-400 hover:text-slate-700 text-xl leading-none cursor-pointer">&times;</button>
+            </div>
+        </x-slot:header>
 
-            <form id="form-pengajuan-permisi" wire:submit.prevent="submitApplication" class="space-y-4 text-xs">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div>
-                        <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Kategori Izin <span class="text-rose-500">*</span>
-                        </label>
-                        <select wire:model="kategori" required
-                            class="w-full px-3.5 py-2.5 bg-slate-50/60 rounded-xl border border-slate-200 text-slate-800 text-xs font-medium focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition">
-                            <option value="">Pilih Kategori</option>
-                            <option value="Kantor">Kantor</option>
-                            <option value="Kesehatan">Kesehatan</option>
-                            <option value="Keluarga">Keluarga</option>
-                            <option value="Lain-lain">Lain-lain</option>
-                        </select>
-                        @error('kategori') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
+        <form wire:submit.prevent="submitApplication" class="space-y-4 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">
+                                Kategori Izin <span class="text-rose-500">*</span>
+                            </label>
+                            <select wire:model="kategori" required
+                                class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-brand-600 text-xs">
+                                <option value="">Pilih Kategori</option>
+                                <option value="Kantor">Kantor</option>
+                                <option value="Kesehatan">Kesehatan</option>
+                                <option value="Keluarga">Keluarga</option>
+                                <option value="Lain-lain">Lain-lain</option>
+                            </select>
+                            @error('kategori') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">
+                                Jenis Izin <span class="text-rose-500">*</span>
+                            </label>
+                            <select wire:model="jenis" required
+                                class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-brand-600 text-xs">
+                                <option value="">Pilih Jenis</option>
+                                <option value="Permohonan">Permohonan</option>
+                                <option value="Pemberitahuan">Pemberitahuan</option>
+                            </select>
+                            @error('jenis') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">
+                                Mulai <span class="text-rose-500">*</span>
+                            </label>
+                            <input wire:model="tanggalMulai" type="datetime-local" required
+                                class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-brand-600 text-xs" />
+                            @error('tanggalMulai') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">
+                                Selesai <span class="text-rose-500">*</span>
+                            </label>
+                            <input wire:model="tanggalSelesai" type="datetime-local" required
+                                class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-brand-600 text-xs" />
+                            @error('tanggalSelesai') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
+                        </div>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Jenis Izin <span class="text-rose-500">*</span>
+                        <label class="block font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-1.5">
+                            Keperluan <span class="text-rose-500">*</span>
                         </label>
-                        <select wire:model="jenis" required
-                            class="w-full px-3.5 py-2.5 bg-slate-50/60 rounded-xl border border-slate-200 text-slate-800 text-xs font-medium focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition">
-                            <option value="">Pilih Jenis</option>
-                            <option value="Permohonan">Permohonan</option>
-                            <option value="Pemberitahuan">Pemberitahuan</option>
-                        </select>
-                        @error('jenis') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
+                        <textarea wire:model="keperluan" rows="3" required
+                            placeholder="Jelaskan keperluan izin Anda..."
+                            class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-brand-600 text-xs resize-none"></textarea>
+                        @error('keperluan') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
                     </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div>
-                        <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Mulai <span class="text-rose-500">*</span>
-                        </label>
-                        <input wire:model="tanggalMulai" type="datetime-local" required
-                            class="w-full px-3.5 py-2.5 bg-slate-50/60 rounded-xl border border-slate-200 text-slate-800 text-xs font-medium focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition" />
-                        @error('tanggalMulai') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div>
-                        <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Selesai <span class="text-rose-500">*</span>
-                        </label>
-                        <input wire:model="tanggalSelesai" type="datetime-local" required
-                            class="w-full px-3.5 py-2.5 bg-slate-50/60 rounded-xl border border-slate-200 text-slate-800 text-xs font-medium focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition" />
-                        @error('tanggalSelesai') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Keperluan <span class="text-rose-500">*</span>
-                    </label>
-                    <textarea wire:model="keperluan" rows="3" required
-                        placeholder="Jelaskan keperluan izin Anda..."
-                        class="w-full p-3 bg-slate-50/60 rounded-xl border border-slate-200 text-slate-800 text-xs font-medium focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition resize-none"></textarea>
-                    @error('keperluan') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
-                </div>
-            </form>
-
-            <x-slot:footer>
-                <div class="flex justify-end gap-2.5 w-full">
-                    <button type="button" @click="showApplicationModal = false"
-                        class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition text-xs cursor-pointer">
-                        Batal
-                    </button>
-                    <button type="submit" form="form-pengajuan-permisi"
-                        class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition text-xs cursor-pointer">
-                        <span wire:loading.remove wire:target="submitApplication">Kirim Pengajuan</span>
-                        <span wire:loading wire:target="submitApplication">Memproses...</span>
-                    </button>
-                </div>
-            </x-slot:footer>
-        </x-modal>
+            
+            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+                <button @click="showApplicationModal = false" type="button"
+                    class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition text-xs cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs shadow-md shadow-brand-600/25 transition cursor-pointer flex items-center gap-1.5">
+                    <span>Ajukan Permohonan</span>
+                    <span wire:loading wire:target="submitApplication" class="material-symbols-outlined animate-spin text-[14px]">refresh</span>
+                </button>
+            </div>
+        </form>
+    </x-modal>
     @endif
 
     <!-- Modal Form Edit Data Permisi -->
@@ -552,6 +541,10 @@
 
     @if(!$isReviewerMode)
         <x-riwayat.detail-modal />
+    @endif
+
+    @if($isReviewerMode && (auth()->user()->isSubbagUmum() || auth()->user()->isAdministrator()))
+        <x-persetujuan.export-modal title="Export Laporan Permohonan Izin" :url="route('permisi.export')" />
     @endif
 
     <!-- Global Confirmation Modal -->

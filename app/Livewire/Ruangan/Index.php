@@ -249,8 +249,9 @@ class Index extends Component
 
     public function submit(): void
     {
-        if ($this->isReviewerMode) {
-            return;
+        // Pengajuan atas nama sendiri, dari halaman Peminjaman maupun Persetujuan.
+        if (! Auth::user()->canAccessPeminjaman()) {
+            abort(403, 'Anda tidak memiliki hak untuk mengajukan peminjaman ruangan.');
         }
 
         $data = $this->validate([

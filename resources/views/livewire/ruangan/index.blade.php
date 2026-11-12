@@ -1,5 +1,6 @@
 <div x-data="{
     showModal: false,
+    showExportModal: false,
     showEditModal: false,
     showDetailModal: false,
     detail: {},
@@ -50,15 +51,8 @@
                     </p>
                 </div>
 
-                @if(!$isReviewerMode)
-                    <div class="flex items-center gap-2.5 self-start sm:self-auto">
-                        <button @click="showModal = true" type="button"
-                            class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs shadow-md shadow-brand-600/25 hover:shadow-brand-600/35 transition flex items-center gap-2 cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                            <span>Ajukan Peminjaman</span>
-                        </button>
-                    </div>
-                @endif
+                <x-persetujuan.header-actions :create="auth()->user()->canAccessPeminjaman()" create-label="Peminjaman" create-action="showModal = true"
+                    :export="auth()->user()->canManageBookings()" />
             </div>
         @else
         <div class="mb-8">
@@ -350,36 +344,31 @@
     </div>
 
     <!-- Modal Form Pengajuan -->
-    @if(!$isReviewerMode)
-        <x-modal show="showModal" maxWidth="max-w-lg">
-            <x-slot:header>
-                <div class="flex justify-between items-center w-full">
-                    <h2 class="text-base font-bold text-slate-900">Form Peminjaman Ruangan</h2>
-                    <button @click="showModal = false" type="button" aria-label="Tutup"
-                        class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none transition-colors cursor-pointer">
-                        &times;
-                    </button>
-                </div>
-            </x-slot:header>
+    @if(auth()->user()->canAccessPeminjaman())
+    <x-modal show="showModal" maxWidth="max-w-lg">
+        <x-slot:header>
+            <div class="flex items-center justify-between w-full">
+                <h3 class="text-base font-bold text-slate-900">Form Pengajuan Peminjaman Ruangan</h3>
+                <button @click="showModal = false" type="button" class="text-slate-400 hover:text-slate-700 text-xl leading-none cursor-pointer">&times;</button>
+            </div>
+        </x-slot:header>
 
-            <form id="form-peminjaman-ruangan" wire:submit.prevent="submit" class="space-y-4 text-xs">
-                @include('livewire.ruangan.partials.booking-fields', ['roomOptions' => $this->rooms])
-            </form>
+        <form wire:submit.prevent="submit" class="space-y-4 text-xs">
+            @include('livewire.ruangan.partials.booking-fields', ['roomOptions' => $this->rooms])
 
-            <x-slot:footer>
-                <div class="flex justify-end gap-2.5 w-full">
-                    <button type="button" @click="showModal = false"
-                        class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition text-xs cursor-pointer">
-                        Batal
-                    </button>
-                    <button type="submit" form="form-peminjaman-ruangan"
-                        class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition text-xs cursor-pointer">
-                        <span wire:loading.remove wire:target="submit">Kirim Pengajuan</span>
-                        <span wire:loading wire:target="submit">Memproses...</span>
-                    </button>
-                </div>
-            </x-slot:footer>
-        </x-modal>
+            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+                <button @click="showModal = false" type="button"
+                    class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition text-xs cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs shadow-md shadow-brand-600/25 transition cursor-pointer flex items-center gap-1.5">
+                    <span>Ajukan Peminjaman</span>
+                    <span wire:loading wire:target="submit" class="material-symbols-outlined animate-spin text-[14px]">refresh</span>
+                </button>
+            </div>
+        </form>
+    </x-modal>
     @endif
 
     <!-- Modal Edit Peminjaman -->
@@ -418,4 +407,8 @@
     @endif
 
     <x-ruangan.confirm-modal />
+
+    @if($isReviewerMode && auth()->user()->canManageBookings())
+        <x-persetujuan.export-modal title="Export Laporan Peminjaman Ruangan" :url="route('ruangan.export')" />
+    @endif
 </div>

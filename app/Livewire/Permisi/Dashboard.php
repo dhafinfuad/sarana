@@ -307,8 +307,9 @@ class Dashboard extends Component
 
     public function submitApplication(): void
     {
-        if ($this->isReviewerMode) {
-            return;
+        // Pengajuan atas nama sendiri, dari halaman Permohonan maupun Persetujuan.
+        if (! Auth::user()->canAccessPermohonanPermisi()) {
+            abort(403, 'Anda tidak memiliki hak untuk mengajukan permohonan izin.');
         }
 
         $this->validate();
