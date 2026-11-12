@@ -503,4 +503,47 @@ class RuanganTest extends TestCase
             return $e->query()->count() === 2;
         });
     }
+    // ---- Akses Persetujuan / Kelola Ruangan: hanya Administrator dan Subbag Umum ----
+
+    public function test_persetujuan_kelola_and_export_are_limited_to_administrator_and_subbag_umum(): void
+    {
+        $allowed = [
+            'Administrator' => $this->admin(),
+            'Subbag Umum'   => $this->makeUser(['jabatan' => 'Pelaksana', 'seksi' => 'Subbagian Umum dan Kepatuhan Internal']),
+        ];
+        $denied = [
+            'Pelaksana'    => $this->pegawai(),
+            'FPP'          => $this->makeUser(['jabatan' => 'FPP', 'seksi' => 'Seksi Pelayanan']),
+            'Supervisor'   => $this->makeUser(['jabatan' => 'Supervisor', 'seksi' => 'Seksi Pelayanan']),
+            'Kepala Seksi' => $this->makeUser(['jabatan' => 'Kepala Seksi', 'seksi' => 'Seksi Pelayanan']),
+            'Kepala Kantor' => $this->makeUser(['jabatan' => 'Kepala Kantor']),
+        ];
+
+        foreach ($allowed as $label => $user) {
+            foreach (['/ruangan/persetujuan', '/ruangan/kelola'] as $url) {
+                $this->actingAs($user)->get($url)->assertOk();
+            }
+        }
+        foreach ($denied as $label => $user) {
+            foreach (['/ruangan/persetujuan', '/ruangan/kelola', '/ruangan/export'] as $url) {
+                $this->actingAs($user)->get($url)->assertForbidden();
+            }
+        }
+    }
+
+    public function test_menu_links_to_persetujuan_and_kelola_only_for_administrator_and_subbag_umum(): void
+    {
+        $persetujuan = route('ruangan.persetujuan', absolute: false);
+        $kelola = route('ruangan.kelola', absolute: false);
+
+        foreach ([$this->admin(), $this->makeUser(['jabatan' => 'Pelaksana', 'seksi' => 'Subbagian Umum dan Kepatuhan Internal'])] as $u) {
+            $this->actingAs($u)->get('/ruangan/peminjaman')->assertOk()
+                ->assertSee($persetujuan, false)->assertSee($kelola, false);
+        }
+
+        foreach ([$this->pegawai(), $this->makeUser(['jabatan' => 'Kepala Seksi', 'seksi' => 'Seksi Pelayanan']), $this->makeUser(['jabatan' => 'Supervisor', 'seksi' => 'Seksi Pelayanan'])] as $u) {
+            $this->actingAs($u)->get('/ruangan/peminjaman')->assertOk()
+                ->assertDontSee($persetujuan, false)->assertDontSee($kelola, false);
+        }
+    }
 }
