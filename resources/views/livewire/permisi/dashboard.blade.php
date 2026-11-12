@@ -1,5 +1,7 @@
 <div x-data="{
     showApplicationModal: false,
+    showDetailModal: false,
+    detail: { title: '', badge: {}, rows: [] },
     showEditModal: false,
     kategori: @entangle('kategori'),
     jenis: @entangle('jenis'),
@@ -583,145 +585,95 @@
                 ]" />
             </div>
 
-            <!-- Right Column: Riwayat -->
+            <!-- Right Column: Riwayat Terbaru -->
             <div class="lg:col-span-8">
-                <!-- Filters Bar -->
-                <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-card mb-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 {{ ($isReviewerMode && count($this->availableSeksiList) > 1) ? 'lg:grid-cols-5' : 'lg:grid-cols-4' }} gap-3.5 items-end">
-                        <!-- Search Input -->
-                        <div class="col-span-1">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Pencarian</label>
-                            <div class="relative">
-                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                    <span class="material-symbols-outlined text-[18px]">search</span>
+                <x-riwayat.list-card title="Riwayat Permohonan" subtitle="5 permohonan izin keluar kantor terakhir Anda">
+                    @forelse($this->recent as $item)
+                        @php
+                            $badge = \App\Support\StatusBadge::for($item->status);
+                            $payload = [
+                                'title' => $item->kategori . ' - ' . $item->jenis,
+                                'badge' => $badge,
+                                'rows' => array_values(array_filter([
+                                    ['Keperluan', $item->keperluan],
+                                    ['Waktu Mulai', $item->tanggal_mulai->translatedFormat('d M Y H:i')],
+                                    ['Waktu Selesai', $item->tanggal_selesai->translatedFormat('d M Y H:i')],
+                                    ['Diajukan', $item->created_at->translatedFormat('d M Y H:i')],
+                                    $item->processor ? ['Diproses Oleh', $item->processor->name . ($item->processed_at ? ' (' . $item->processed_at->translatedFormat('d M Y H:i') . ')' : '')] : null,
+                                ])),
+                            ];
+                        @endphp
+                        <div class="p-5 flex flex-wrap items-center justify-between gap-3 hover:bg-slate-50/70 transition" wire:key="recent-{{ $item->id }}">
+                            <div class="flex items-center gap-3.5 min-w-0">
+                                <div class="w-9 h-9 rounded-full {{ $badge['bg'] }} flex items-center justify-center shrink-0 border">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                                    </svg>
                                 </div>
-                                <input type="text" wire:model.live.debounce.300ms="search"
-                                    placeholder="Cari Pegawai / Keperluan / Jenis..."
-                                    class="w-full bg-slate-50/60 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs font-medium text-slate-800 placeholder-slate-400 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all">
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-slate-800">{{ $item->kategori }} &bull; {{ $item->jenis }}</h4>
+                                    <p class="text-slate-400 text-[11px] mt-0.5">
+                                        REQ-{{ $item->created_at->format('Y') }}-{{ str_pad((string) $item->id, 4, '0', STR_PAD_LEFT) }} &bull;
+                                        Diajukan {{ $item->created_at->format('d M Y') }}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-
-                        @if($isReviewerMode && count($this->availableSeksiList) > 1)
-                        <div class="col-span-1">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Seksi</label>
-                            <select wire:model.live="filterSeksi"
-                                class="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all">
-                                <option value="">Semua Seksi ({{ count($this->availableSeksiList) }})</option>
-                                @foreach($this->availableSeksiList as $seksiItem)
-                                    <option value="{{ $seksiItem }}">{{ $seksiItem }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        @endif
-
-                        <!-- Status Filter -->
-                        <div class="col-span-1">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Status</label>
-                            <select wire:model.live="status"
-                                class="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all">
-                                <option value="">Semua Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="disetujui">Disetujui</option>
-                                <option value="ditolak">Ditolak</option>
-                                <option value="selesai">Selesai</option>
-                                <option value="dibatalkan">Dibatalkan</option>
-                            </select>
-                        </div>
-
-                        <!-- Start Date -->
-                        <div class="col-span-1">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tanggal Mulai</label>
-                            <input type="date" wire:model.live="startDate"
-                                class="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all">
-                        </div>
-
-                        <!-- End Date -->
-                        <div class="col-span-1">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tanggal Selesai</label>
-                            <input type="date" wire:model.live="endDate"
-                                class="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all">
-                        </div>
-                    </div>
-                </div>
-
-
-                <x-riwayat.list-card title="Riwayat Permohonan" subtitle="Daftar permohonan izin keluar kantor Anda">
-                        @forelse($this->permisis as $item)
-                            @php
-                                $statusBadge = match ($item->status) {
-                                    'pending' => ['bg' => 'bg-amber-50 text-amber-700 border-amber-200', 'dot' => 'bg-amber-500', 'label' => 'Pending'],
-                                    'disetujui' => ['bg' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500', 'label' => 'Disetujui'],
-                                    'ditolak' => ['bg' => 'bg-rose-50 text-rose-700 border-rose-200', 'dot' => 'bg-rose-500', 'label' => 'Ditolak'],
-                                    'selesai' => ['bg' => 'bg-blue-50 text-blue-700 border-blue-200', 'dot' => 'bg-blue-500', 'label' => 'Selesai'],
-                                    'dibatalkan' => ['bg' => 'bg-slate-100 text-slate-600 border-slate-200', 'dot' => 'bg-slate-400', 'label' => 'Dibatalkan'],
-                                    default => ['bg' => 'bg-slate-50 text-slate-700 border-slate-200', 'dot' => 'bg-slate-500', 'label' => ucfirst($item->status)],
-                                };
-                            @endphp
-                            <div class="p-5 flex flex-wrap items-center justify-between gap-3 hover:bg-slate-50/70 transition" wire:key="permisi-{{ $item->id }}">
-                                <div class="flex items-center gap-3.5 min-w-0">
-                                    <div class="w-9 h-9 rounded-full {{ $statusBadge['bg'] }} flex items-center justify-center shrink-0 border">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <h4 class="font-bold text-slate-800">{{ $item->kategori }} &bull; {{ $item->jenis }}</h4>
-                                        <p class="text-slate-400 text-[11px] mt-0.5">
-                                            {{ \Illuminate\Support\Str::limit($item->keperluan, 70) }} &bull;
-                                            {{ $item->tanggal_mulai->format('d M Y H:i') }} s.d. {{ $item->tanggal_selesai->format('d M Y H:i') }}
-                                        </p>
-                                        @if($item->processor)
-                                            <p class="text-slate-400 text-[10px] mt-0.5" title="Diproses oleh: {{ $item->processor->name }} ({{ $item->processed_at ? $item->processed_at->format('d M Y H:i') : '' }})">
-                                                Oleh: {{ \Illuminate\Support\Str::limit($item->processor->name, 24) }}
-                                            </p>
-                                        @endif
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2.5 shrink-0">
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border {{ $statusBadge['bg'] }}">
-                                        <span class="w-1.5 h-1.5 rounded-full {{ $statusBadge['dot'] }}"></span>
-                                        {{ $statusBadge['label'] }}
-                                    </span>
+                            <div class="flex items-center gap-2.5 shrink-0">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border {{ $badge['bg'] }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $badge['dot'] }}"></span>
+                                    {{ $badge['label'] }}
+                                </span>
+                                @if($item->show_actions)
                                     <div class="inline-flex items-center gap-0.5">
-                                        @if($item->status === 'pending' || auth()->user()->isSubbagUmum() || auth()->user()->isAdministrator())
-                                            <button type="button" wire:click="editBooking({{ $item->id }})"
-                                                class="p-1 text-amber-600 hover:bg-amber-50 rounded-lg border border-transparent hover:border-amber-200 transition cursor-pointer shrink-0"
-                                                title="Edit Permohonan">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                            </button>
-                                        @endif
-                                        @if($item->status === 'pending')
-                                            <button type="button"
-                                                @click="openConfirm('cancel', {{ $item->id }}, 'Batalkan Permohonan', 'Apakah Anda yakin ingin membatalkan permohonan izin ini?')"
-                                                class="p-1 text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition cursor-pointer shrink-0"
-                                                title="Batalkan Permohonan">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                                            </button>
-                                        @elseif(in_array($item->status, ['ditolak', 'selesai', 'dibatalkan']))
-                                            <button type="button"
-                                                @click="openConfirm('delete', {{ $item->id }}, 'Hapus Permohonan', 'Apakah Anda yakin ingin menghapus permohonan ini?')"
-                                                class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition cursor-pointer shrink-0"
-                                                title="Hapus Permohonan">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
-                                        @endif
+                                        {{-- Batalkan --}}
+                                        <button type="button" @if($item->can_cancel) @click="openConfirm('cancel', {{ $item->id }}, 'Batalkan Permohonan', 'Apakah Anda yakin ingin membatalkan permohonan izin ini?')" @else disabled @endif
+                                            @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-rose-600 hover:bg-rose-50 hover:border-rose-200 cursor-pointer' => $item->can_cancel, 'text-slate-300 cursor-not-allowed' => !$item->can_cancel])
+                                            title="{{ $item->can_cancel ? 'Batalkan Permohonan' : 'Hanya permohonan Pending yang dapat dibatalkan' }}">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                                        </button>
+                                        {{-- Edit --}}
+                                        <button type="button" @if($item->can_edit) wire:click="editBooking({{ $item->id }})" @else disabled @endif
+                                            @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-amber-600 hover:bg-amber-50 hover:border-amber-200 cursor-pointer' => $item->can_edit, 'text-slate-300 cursor-not-allowed' => !$item->can_edit])
+                                            title="{{ $item->can_edit ? 'Edit Permohonan' : 'Tidak dapat diedit' }}">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                        </button>
+                                        {{-- Hapus --}}
+                                        <button type="button" @if($item->can_delete) @click="openConfirm('delete', {{ $item->id }}, 'Hapus Permohonan', 'Apakah Anda yakin ingin menghapus permohonan ini?')" @else disabled @endif
+                                            @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 cursor-pointer' => $item->can_delete, 'text-slate-300 cursor-not-allowed' => !$item->can_delete])
+                                            title="{{ $item->can_delete ? 'Hapus Permohonan' : 'Tidak dapat dihapus' }}">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
                                     </div>
-                                </div>
+                                @endif
+                                <button type="button" @click="detail = @js($payload); showDetailModal = true"
+                                    class="px-3 py-1 rounded-xl text-[11px] font-bold border border-brand-200 text-brand-700 bg-brand-50/50 hover:bg-brand-100 transition flex items-center gap-1.5 cursor-pointer"
+                                    title="Klik untuk melihat detail">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    <span>Detail</span>
+                                </button>
                             </div>
-                        @empty
-                            <div class="p-8 text-center text-slate-400 text-xs">
-                                <svg class="w-10 h-10 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                Belum ada riwayat permohonan izin
-                            </div>
-                        @endforelse
+                        </div>
+                    @empty
+                        <div class="p-8 text-center text-slate-400 text-xs">
+                            <svg class="w-10 h-10 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Belum ada riwayat permohonan izin
+                        </div>
+                    @endforelse
 
-                    @if($this->permisis->hasPages())
-                        <x-slot:footer>
-                            {{ $this->permisis->links(data: ['scrollTo' => false]) }}
-                        </x-slot:footer>
-                    @endif
+                    <x-slot:footer>
+                        <a href="{{ route('permisi.riwayat') }}" wire:navigate.hover
+                            class="text-xs font-bold text-brand-600 hover:text-brand-700 transition flex items-center gap-1">
+                            Lihat Semua Riwayat
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </x-slot:footer>
                 </x-riwayat.list-card>
             </div>
         </div>
@@ -907,6 +859,10 @@
             </div>
         </x-slot:footer>
     </x-modal>
+
+    @if(!$isReviewerMode)
+        <x-riwayat.detail-modal />
+    @endif
 
     <!-- Global Confirmation Modal -->
     <x-modal show="showConfirmModal" maxWidth="max-w-md">

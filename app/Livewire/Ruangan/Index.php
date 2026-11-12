@@ -140,17 +140,49 @@ class Index extends Component
 
         $page = $query->latest('tanggal_mulai')->paginate(10);
 
-        // Flag hak aksi per baris (atribut sementara, tidak disimpan ke database).
-        // Tombol selalu tampil di semua status; flag menentukan apakah bisa diklik.
-        $page->getCollection()->each(function (RoomBooking $b) {
+        $this->decorate($page->getCollection());
+
+        return $page;
+    }
+
+    /**
+     * 5 pengajuan terbaru milik pemohon untuk kartu Riwayat (mode Peminjaman).
+     *
+     * @return \Illuminate\Support\Collection<int, RoomBooking>
+     */
+    #[Computed]
+    public function recent(): \Illuminate\Support\Collection
+    {
+        $rows = RoomBooking::with('room')
+            ->where('user_id', Auth::user()->id)
+            ->latest()->latest('id')
+            ->limit(5)
+            ->get();
+
+        $this->decorate($rows);
+
+        return $rows;
+    }
+
+    /**
+     * Flag hak aksi per baris (atribut sementara, tidak disimpan ke database).
+     * Tombol aksi hanya ditampilkan pada status Pending, kecuali untuk peran yang
+     * melihat semua aksi (Kepala Seksi, Kepala Kantor, Subbag Umum, Administrator).
+     *
+     * @param \Illuminate\Support\Collection<int, RoomBooking> $rows
+     */
+    private function decorate(\Illuminate\Support\Collection $rows): void
+    {
+        $user = Auth::user();
+
+        $rows->each(function (RoomBooking $b) use ($user) {
             $b->setAttribute('can_approve', $this->isReviewerMode && in_array($b->status, ['pending', 'ditolak'], true));
             $b->setAttribute('can_reject', $this->isReviewerMode && in_array($b->status, ['pending', 'disetujui'], true));
             $b->setAttribute('can_edit', $this->userCanEdit($b));
             $b->setAttribute('can_delete', $this->userCanDelete($b));
-            $b->setAttribute('can_cancel', ! $this->isReviewerMode && $b->user_id === Auth::user()->id && $b->status === 'pending');
+            $b->setAttribute('can_cancel', ! $this->isReviewerMode && $b->user_id === $user->id && $b->status === 'pending');
+            $b->setAttribute('show_actions', $b->status === 'pending' || $user->canSeeAllRequestActions());
         });
-
-        return $page;
     }
 
     // -----------------------------------------------------------------------
@@ -270,21 +302,28 @@ class Index extends Component
     // Edit & Hapus
     // -----------------------------------------------------------------------
 
-    /** Pengelola boleh mengubah semua status; pemohon hanya miliknya yang masih pending. */
+    /**
+     * Pengelola boleh mengubah semua status. Pemohon hanya miliknya sendiri: status Pending,
+     * atau semua status bila berperan Kepala Seksi / Kepala Kantor / Subbag Umum / Administrator.
+     */
     private function userCanEdit(RoomBooking $b): bool
     {
         $u = Auth::user();
 
-        return $u->canManageBookings() || ($b->user_id === $u->id && $b->status === 'pending');
+        return $u->canManageBookings()
+            || ($b->user_id === $u->id && ($b->status === 'pending' || $u->canSeeAllRequestActions()));
     }
 
-    /** Pengelola boleh menghapus semua status; pemohon hanya miliknya yang ditolak/dibatalkan. */
+    /**
+     * Pengelola boleh menghapus semua status. Pemohon hanya miliknya sendiri: status Pending,
+     * atau semua status bila berperan Kepala Seksi / Kepala Kantor / Subbag Umum / Administrator.
+     */
     private function userCanDelete(RoomBooking $b): bool
     {
         $u = Auth::user();
 
         return $u->canManageBookings()
-            || ($b->user_id === $u->id && in_array($b->status, ['ditolak', 'dibatalkan'], true));
+            || ($b->user_id === $u->id && ($b->status === 'pending' || $u->canSeeAllRequestActions()));
     }
 
     public function edit(int $id): void
