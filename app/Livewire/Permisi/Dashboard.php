@@ -217,6 +217,25 @@ class Dashboard extends Component
         return $query->paginate(10);
     }
 
+    /**
+     * Ringkasan permohonan milik pegawai untuk kartu Overview Status (mode Permohonan).
+     *
+     * @return array{pending: int, disetujui: int, gagal: int, selesai: int}
+     */
+    #[Computed]
+    public function overview(): array
+    {
+        $c = Permisi::where('user_id', Auth::user()->id)
+            ->selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
+
+        return [
+            'pending'   => (int) ($c['pending'] ?? 0),
+            'disetujui' => (int) ($c['disetujui'] ?? 0),
+            'gagal'     => (int) (($c['ditolak'] ?? 0) + ($c['dibatalkan'] ?? 0)),
+            'selesai'   => (int) ($c['selesai'] ?? 0),
+        ];
+    }
+
     #[Computed]
     public function analytics(): array
     {
