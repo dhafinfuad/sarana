@@ -14,8 +14,11 @@ CONTAINER_NAME="1Panel-php8-LCJZ"                                      # contain
 APP_DIR_IN_CONTAINER="/www/sites/sarana/index"                         # path folder yang sama di dalam container
 LOG_FILE="/home/administrator/scripts/sync-sarana.log"                 # log terpisah per repo
 
-# Cegah dua proses berjalan bersamaan untuk repo yang sama
-exec 9>"/tmp/sync-$(basename "$SITE_DIR").lock"
+# Cegah dua proses berjalan bersamaan untuk repo yang sama.
+# Kunci diambil dari file script ini sendiri (dibuka baca-saja): tidak membuat file di /tmp
+# (root vs administrator bisa saling "Permission denied") dan unik per script, bukan per
+# nama folder (semua situs 1Panel berakhir di "/index").
+exec 9<"$0"
 flock -n 9 || exit 0
 
 cd "$SITE_DIR" || exit 1
