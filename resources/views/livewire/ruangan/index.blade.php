@@ -1,5 +1,6 @@
 <div x-data="{
     showModal: false,
+    showEditModal: false,
     showConfirmModal: false,
     confirmAction: '',
     confirmId: null,
@@ -21,10 +22,14 @@
             $wire.reject(this.confirmId);
         } else if (this.confirmAction === 'cancel') {
             $wire.cancel(this.confirmId);
+        } else if (this.confirmAction === 'delete') {
+            $wire.delete(this.confirmId);
         }
         this.showConfirmModal = false;
     }
-}" @close-room-modal.window="showModal = false">
+}" @close-room-modal.window="showModal = false"
+  @open-booking-edit-modal.window="showEditModal = true"
+  @close-booking-edit-modal.window="showEditModal = false">
 
     @if(!auth()->user()->canAccessAdminDashboard())
         <x-top-header title="{{ $isReviewerMode ? 'Persetujuan Ruangan' : 'Peminjaman Ruangan' }}" />
@@ -158,27 +163,39 @@
                                 </td>
                                 <td class="py-3 px-1.5 text-center whitespace-nowrap">
                                     <div class="inline-flex items-center justify-center gap-0.5">
-                                        @if($isReviewerMode && $row->status === 'pending')
-                                            <button type="button"
-                                                @click="openConfirm('approve', {{ $row->id }}, 'Setujui Peminjaman', 'Apakah Anda yakin ingin menyetujui peminjaman ruangan ini?')"
-                                                class="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg border border-transparent hover:border-emerald-200 transition cursor-pointer shrink-0"
-                                                title="Setujui Peminjaman">
+                                        @if($isReviewerMode)
+                                            {{-- Setuju --}}
+                                            <button type="button" @if($row->can_approve) @click="openConfirm('approve', {{ $row->id }}, 'Setujui Peminjaman', 'Apakah Anda yakin ingin menyetujui peminjaman ruangan ini?')" @else disabled @endif
+                                                @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 cursor-pointer' => $row->can_approve, 'text-slate-300 cursor-not-allowed' => !$row->can_approve])
+                                                title="{{ $row->can_approve ? 'Setujui Peminjaman' : 'Tidak dapat disetujui pada status ini' }}">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                             </button>
-                                            <button type="button"
-                                                @click="openConfirm('reject', {{ $row->id }}, 'Tolak Peminjaman', 'Apakah Anda yakin ingin menolak peminjaman ruangan ini?')"
-                                                class="p-1 text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition cursor-pointer shrink-0"
-                                                title="Tolak Peminjaman">
+                                            {{-- Tolak --}}
+                                            <button type="button" @if($row->can_reject) @click="openConfirm('reject', {{ $row->id }}, 'Tolak Peminjaman', 'Apakah Anda yakin ingin menolak peminjaman ruangan ini?')" @else disabled @endif
+                                                @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-rose-600 hover:bg-rose-50 hover:border-rose-200 cursor-pointer' => $row->can_reject, 'text-slate-300 cursor-not-allowed' => !$row->can_reject])
+                                                title="{{ $row->can_reject ? 'Tolak Peminjaman' : 'Tidak dapat ditolak pada status ini' }}">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                                             </button>
-                                        @elseif(!$isReviewerMode && $row->status === 'pending')
-                                            <button type="button"
-                                                @click="openConfirm('cancel', {{ $row->id }}, 'Batalkan Peminjaman', 'Apakah Anda yakin ingin membatalkan pengajuan peminjaman ruangan ini?')"
-                                                class="p-1 text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition cursor-pointer shrink-0"
-                                                title="Batalkan Peminjaman">
+                                        @else
+                                            {{-- Batalkan (pemohon) --}}
+                                            <button type="button" @if($row->can_cancel) @click="openConfirm('cancel', {{ $row->id }}, 'Batalkan Peminjaman', 'Apakah Anda yakin ingin membatalkan pengajuan peminjaman ruangan ini?')" @else disabled @endif
+                                                @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-rose-600 hover:bg-rose-50 hover:border-rose-200 cursor-pointer' => $row->can_cancel, 'text-slate-300 cursor-not-allowed' => !$row->can_cancel])
+                                                title="{{ $row->can_cancel ? 'Batalkan Peminjaman' : 'Hanya pengajuan Pending yang dapat dibatalkan' }}">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
                                             </button>
                                         @endif
+                                        {{-- Edit --}}
+                                        <button type="button" @if($row->can_edit) wire:click="edit({{ $row->id }})" @else disabled @endif
+                                            @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-amber-600 hover:bg-amber-50 hover:border-amber-200 cursor-pointer' => $row->can_edit, 'text-slate-300 cursor-not-allowed' => !$row->can_edit])
+                                            title="{{ $row->can_edit ? 'Edit Peminjaman' : 'Hanya pengajuan Pending yang dapat diedit' }}">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                        </button>
+                                        {{-- Hapus --}}
+                                        <button type="button" @if($row->can_delete) @click="openConfirm('delete', {{ $row->id }}, 'Hapus Peminjaman', 'Apakah Anda yakin ingin menghapus data peminjaman ini? Tindakan ini tidak dapat dibatalkan.')" @else disabled @endif
+                                            @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 cursor-pointer' => $row->can_delete, 'text-slate-300 cursor-not-allowed' => !$row->can_delete])
+                                            title="{{ $row->can_delete ? 'Hapus Peminjaman' : 'Hanya pengajuan Ditolak/Dibatalkan yang dapat dihapus' }}">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -215,56 +232,7 @@
             </x-slot:header>
 
             <form id="form-peminjaman-ruangan" wire:submit.prevent="submit" class="space-y-4 text-xs">
-                <div>
-                    <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Ruangan <span class="text-rose-500">*</span>
-                    </label>
-                    <select wire:model="roomId"
-                        class="w-full px-3.5 py-2.5 bg-slate-50/60 rounded-xl border border-slate-200 text-slate-800 text-xs font-medium focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition">
-                        <option value="">Pilih Ruangan</option>
-                        @foreach($this->rooms as $room)
-                            <option value="{{ $room->id }}">{{ $room->nama }} (kapasitas {{ $room->kapasitas }})</option>
-                        @endforeach
-                    </select>
-                    @error('roomId') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
-                </div>
-
-                <div>
-                    <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Keperluan <span class="text-rose-500">*</span>
-                    </label>
-                    <input type="text" wire:model="keperluan" placeholder="Contoh: Rapat koordinasi bulanan"
-                        class="w-full px-3.5 py-2.5 bg-slate-50/60 rounded-xl border border-slate-200 text-slate-800 text-xs font-medium focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition">
-                    @error('keperluan') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
-                </div>
-
-                <div>
-                    <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Jumlah Peserta <span class="text-rose-500">*</span>
-                    </label>
-                    <input type="number" min="1" wire:model="jumlahPeserta"
-                        class="w-full px-3.5 py-2.5 bg-slate-50/60 rounded-xl border border-slate-200 text-slate-800 text-xs font-medium focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition">
-                    @error('jumlahPeserta') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div>
-                        <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Mulai <span class="text-rose-500">*</span>
-                        </label>
-                        <input type="datetime-local" wire:model="tanggalMulai"
-                            class="w-full px-3.5 py-2.5 bg-slate-50/60 rounded-xl border border-slate-200 text-slate-800 text-xs font-medium focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition">
-                        @error('tanggalMulai') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
-                    </div>
-                    <div>
-                        <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Selesai <span class="text-rose-500">*</span>
-                        </label>
-                        <input type="datetime-local" wire:model="tanggalSelesai"
-                            class="w-full px-3.5 py-2.5 bg-slate-50/60 rounded-xl border border-slate-200 text-slate-800 text-xs font-medium focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition">
-                        @error('tanggalSelesai') <span class="text-rose-600 text-[11px] mt-1 block font-medium">{{ $message }}</span> @enderror
-                    </div>
-                </div>
+                @include('livewire.ruangan.partials.booking-fields', ['roomOptions' => $this->rooms])
             </form>
 
             <x-slot:footer>
@@ -282,6 +250,37 @@
             </x-slot:footer>
         </x-modal>
     @endif
+
+    <!-- Modal Edit Peminjaman -->
+    <x-modal show="showEditModal" maxWidth="max-w-lg">
+        <x-slot:header>
+            <div class="flex justify-between items-center w-full">
+                <h2 class="text-base font-bold text-slate-900">Edit Peminjaman Ruangan</h2>
+                <button @click="showEditModal = false; $wire.resetForm()" type="button" aria-label="Tutup"
+                    class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none transition-colors cursor-pointer">
+                    &times;
+                </button>
+            </div>
+        </x-slot:header>
+
+        <form id="form-edit-peminjaman-ruangan" wire:submit.prevent="update" class="space-y-4 text-xs">
+            @include('livewire.ruangan.partials.booking-fields', ['roomOptions' => $this->editRooms])
+        </form>
+
+        <x-slot:footer>
+            <div class="flex justify-end gap-2.5 w-full">
+                <button type="button" @click="showEditModal = false; $wire.resetForm()"
+                    class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition text-xs cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit" form="form-edit-peminjaman-ruangan"
+                    class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition text-xs cursor-pointer">
+                    <span wire:loading.remove wire:target="update">Simpan Perubahan</span>
+                    <span wire:loading wire:target="update">Memproses...</span>
+                </button>
+            </div>
+        </x-slot:footer>
+    </x-modal>
 
     <x-ruangan.confirm-modal />
 </div>

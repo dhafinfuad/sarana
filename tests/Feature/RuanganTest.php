@@ -225,4 +225,95 @@ class RuanganTest extends TestCase
             ->set('tanggalSelesai', now()->addDay()->addHour()->format('Y-m-d\TH:i'))
             ->call('submit')->assertHasErrors(['roomId']);
     }
+    // ---- Edit, Hapus, dan aksi di semua status ----
+
+    public function test_reviewer_can_change_decision_after_processing(): void
+    {
+        $room = $this->room();
+        $b = $this->booking($room, $this->pegawai(), now()->addDay()->setTime(9, 0), now()->addDay()->setTime(10, 0), 'ditolak');
+
+        $c = Livewire::actingAs($this->admin())->test(Index::class, ['mode' => 'reviewer']);
+        $c->call('approve', $b->id);
+        $this->assertSame('disetujui', $b->fresh()->status);
+
+        $c->call('reject', $b->id);
+        $this->assertSame('ditolak', $b->fresh()->status);
+    }
+
+    public function test_cancelled_booking_cannot_be_approved_or_rejected(): void
+    {
+        $b = $this->booking($this->room(), $this->pegawai(), now()->addDay(), now()->addDay()->addHour(), 'dibatalkan');
+
+        Livewire::actingAs($this->admin())->test(Index::class, ['mode' => 'reviewer'])
+            ->call('approve', $b->id)->call('reject', $b->id);
+
+        $this->assertSame('dibatalkan', $b->fresh()->status);
+    }
+
+    public function test_reviewer_can_edit_booking_of_any_status(): void
+    {
+        $room = $this->room(['kapasitas' => 20]);
+        $b = $this->booking($room, $this->pegawai(), now()->addDay()->setTime(9, 0), now()->addDay()->setTime(10, 0), 'disetujui');
+
+        Livewire::actingAs($this->admin())->test(Index::class, ['mode' => 'reviewer'])
+            ->call('edit', $b->id)
+            ->assertSet('keperluan', 'Rapat koordinasi')
+            ->set('keperluan', 'Rapat koordinasi diperbarui')
+            ->set('jumlahPeserta', '15')
+            ->call('update')->assertHasNoErrors();
+
+        $b->refresh();
+        $this->assertSame('Rapat koordinasi diperbarui', $b->keperluan);
+        $this->assertSame(15, $b->jumlah_peserta);
+        $this->assertSame('disetujui', $b->status);
+    }
+
+    public function test_edit_is_blocked_when_it_overlaps_another_booking(): void
+    {
+        $room = $this->room();
+        $u = $this->pegawai();
+        $this->booking($room, $u, now()->addDay()->setTime(9, 0), now()->addDay()->setTime(11, 0), 'disetujui');
+        $b = $this->booking($room, $u, now()->addDay()->setTime(13, 0), now()->addDay()->setTime(14, 0));
+
+        Livewire::actingAs($this->admin())->test(Index::class, ['mode' => 'reviewer'])
+            ->call('edit', $b->id)
+            ->set('tanggalMulai', now()->addDay()->setTime(10, 0)->format('Y-m-d\TH:i'))
+            ->set('tanggalSelesai', now()->addDay()->setTime(12, 0)->format('Y-m-d\TH:i'))
+            ->call('update')->assertHasErrors(['tanggalMulai']);
+    }
+
+    public function test_pemohon_can_edit_only_own_pending_and_delete_only_closed(): void
+    {
+        $room = $this->room();
+        $owner = $this->pegawai();
+        $other = $this->pegawai();
+        $pending = $this->booking($room, $owner, now()->addDay()->setTime(9, 0), now()->addDay()->setTime(10, 0));
+        $approved = $this->booking($room, $owner, now()->addDays(2)->setTime(9, 0), now()->addDays(2)->setTime(10, 0), 'disetujui');
+        $rejected = $this->booking($room, $owner, now()->addDays(3)->setTime(9, 0), now()->addDays(3)->setTime(10, 0), 'ditolak');
+
+        // orang lain tidak bisa mengedit / menghapus
+        Livewire::actingAs($other)->test(Index::class)->call('edit', $pending->id)->assertSet('editId', null);
+        Livewire::actingAs($other)->test(Index::class)->call('delete', $rejected->id);
+        $this->assertDatabaseHas('room_bookings', ['id' => $rejected->id]);
+
+        // pemilik: edit pending boleh, edit disetujui tidak
+        Livewire::actingAs($owner)->test(Index::class)->call('edit', $pending->id)->assertSet('editId', $pending->id);
+        Livewire::actingAs($owner)->test(Index::class)->call('edit', $approved->id)->assertSet('editId', null);
+
+        // pemilik: hapus ditolak boleh, hapus disetujui/pending tidak
+        Livewire::actingAs($owner)->test(Index::class)->call('delete', $approved->id)->call('delete', $pending->id);
+        $this->assertDatabaseHas('room_bookings', ['id' => $approved->id]);
+        $this->assertDatabaseHas('room_bookings', ['id' => $pending->id]);
+        Livewire::actingAs($owner)->test(Index::class)->call('delete', $rejected->id);
+        $this->assertDatabaseMissing('room_bookings', ['id' => $rejected->id]);
+    }
+
+    public function test_reviewer_can_delete_booking_of_any_status(): void
+    {
+        $b = $this->booking($this->room(), $this->pegawai(), now()->addDay(), now()->addDay()->addHour(), 'disetujui');
+
+        Livewire::actingAs($this->admin())->test(Index::class, ['mode' => 'reviewer'])->call('delete', $b->id);
+
+        $this->assertDatabaseMissing('room_bookings', ['id' => $b->id]);
+    }
 }
