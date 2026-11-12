@@ -59,6 +59,18 @@
             <span class="font-label-md text-[14px]">Permisi</span>
         </a>
 
+        <!-- MENU RUANGAN -->
+        @if(auth()->user()->canManageBookings())
+        <a wire:navigate.hover @class([
+            'flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-transform duration-200 hover:translate-x-1',
+            'bg-secondary-fixed/50 text-on-secondary-container font-bold' => request()->routeIs('ruangan.*'),
+            'text-text-secondary hover:bg-surface-container-low' => !request()->routeIs('ruangan.*'),
+        ]) href="{{ route('ruangan.persetujuan') }}">
+            <span class="material-symbols-outlined">meeting_room</span>
+            <span class="font-label-md text-[14px]">Ruangan</span>
+        </a>
+        @endif
+
         <!-- MENU ASMARA -->
         @if(auth()->user()->canAccessAsmaraAdmin())
         <div
