@@ -127,7 +127,7 @@
                         </button>
 
                         <div x-show="open" x-transition.opacity style="display: none;"
-                            class="absolute left-0 mt-1.5 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-50">
+                            class="absolute left-0 mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-50">
                             @if(auth()->user()->canAccessPeminjaman())
                             <a wire:navigate.hover href="{{ route('ruangan.peminjaman') }}" class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -137,7 +137,11 @@
                             @if(auth()->user()->canManageBookings())
                             <a wire:navigate.hover href="{{ route('ruangan.persetujuan') }}" class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span>Persetujuan &amp; Kelola Ruangan</span>
+                                <span>Persetujuan</span>
+                            </a>
+                            <a wire:navigate.hover href="{{ route('ruangan.kelola') }}" class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                <span>Kelola Ruangan</span>
                             </a>
                             @endif
                         </div>

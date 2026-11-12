@@ -61,14 +61,33 @@
 
         <!-- MENU RUANGAN -->
         @if(auth()->user()->canManageBookings())
-        <a wire:navigate.hover @class([
-            'flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-transform duration-200 hover:translate-x-1',
-            'bg-secondary-fixed/50 text-on-secondary-container font-bold' => request()->routeIs('ruangan.*'),
-            'text-text-secondary hover:bg-surface-container-low' => !request()->routeIs('ruangan.*'),
-        ]) href="{{ route('ruangan.persetujuan') }}">
-            <span class="material-symbols-outlined">meeting_room</span>
-            <span class="font-label-md text-[14px]">Ruangan</span>
-        </a>
+        <div x-data="{ open: {{ request()->routeIs('ruangan.*') ? 'true' : 'false' }} }">
+            <button type="button" @click="open = !open"
+                class="w-full flex items-center justify-between gap-3 px-4 py-3 text-text-secondary hover:bg-surface-container-low rounded-lg transition-colors duration-200 cursor-pointer">
+                <span class="flex items-center gap-3">
+                    <span class="material-symbols-outlined">meeting_room</span>
+                    <span class="font-label-md text-[14px]">Ruangan</span>
+                </span>
+                <span class="material-symbols-outlined text-[18px] transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
+            </button>
+            <div x-show="open" x-transition.opacity style="display: none;" class="mt-1 ml-4 space-y-1">
+                <a wire:navigate.hover href="{{ route('ruangan.peminjaman') }}" @class([
+                    'flex items-center gap-3 px-4 py-2.5 rounded-lg text-[13px] transition-all duration-300',
+                    'bg-secondary-fixed/50 text-on-secondary-container font-bold' => request()->routeIs('ruangan.peminjaman'),
+                    'text-text-secondary font-medium hover:bg-surface-container-lowest hover:text-on-surface' => !request()->routeIs('ruangan.peminjaman'),
+                ])><span>Peminjaman</span></a>
+                <a wire:navigate.hover href="{{ route('ruangan.persetujuan') }}" @class([
+                    'flex items-center gap-3 px-4 py-2.5 rounded-lg text-[13px] transition-all duration-300',
+                    'bg-secondary-fixed/50 text-on-secondary-container font-bold' => request()->routeIs('ruangan.persetujuan'),
+                    'text-text-secondary font-medium hover:bg-surface-container-lowest hover:text-on-surface' => !request()->routeIs('ruangan.persetujuan'),
+                ])><span>Persetujuan</span></a>
+                <a wire:navigate.hover href="{{ route('ruangan.kelola') }}" @class([
+                    'flex items-center gap-3 px-4 py-2.5 rounded-lg text-[13px] transition-all duration-300',
+                    'bg-secondary-fixed/50 text-on-secondary-container font-bold' => request()->routeIs('ruangan.kelola'),
+                    'text-text-secondary font-medium hover:bg-surface-container-lowest hover:text-on-surface' => !request()->routeIs('ruangan.kelola'),
+                ])><span>Kelola Ruangan</span></a>
+            </div>
+        </div>
         @endif
 
         <!-- MENU ASMARA -->

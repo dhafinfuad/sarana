@@ -19,8 +19,8 @@ use Livewire\WithPagination;
  * Livewire Component: Ruangan/Index
  *
  * - Mode Peminjaman  (ruangan.peminjaman): pegawai mengajukan & melihat riwayat miliknya.
- * - Mode Persetujuan (ruangan.persetujuan): Administrator / Subbag Umum menyetujui,
- *   menolak, dan mengelola master ruangan.
+ * - Mode Persetujuan (ruangan.persetujuan): Administrator / Subbag Umum menyetujui
+ *   atau menolak pengajuan. Master ruangan dikelola di Ruangan\Kelola.
  */
 class Index extends Component
 {
@@ -38,12 +38,6 @@ class Index extends Component
     public string $jumlahPeserta = '1';
     public string $tanggalMulai = '';
     public string $tanggalSelesai = '';
-
-    // Form master ruangan (reviewer)
-    public string $roomNama = '';
-    public string $roomLokasi = '';
-    public string $roomKapasitas = '';
-    public string $roomFasilitas = '';
 
     public function mount(string $mode = 'pemohon'): void
     {
@@ -72,12 +66,6 @@ class Index extends Component
     public function rooms()
     {
         return Room::tersedia()->orderBy('nama')->get();
-    }
-
-    #[Computed]
-    public function allRooms()
-    {
-        return Room::orderBy('nama')->get();
     }
 
     #[Computed]
@@ -216,37 +204,6 @@ class Index extends Component
             ]);
             session()->flash('success', 'Peminjaman ruangan ditolak.');
         }
-    }
-
-    public function addRoom(): void
-    {
-        $this->authorizeReviewer();
-
-        $data = $this->validate([
-            'roomNama'      => ['required', 'string', 'max:100'],
-            'roomLokasi'    => ['nullable', 'string', 'max:150'],
-            'roomKapasitas' => ['required', 'integer', 'min:1', 'max:1000'],
-            'roomFasilitas' => ['nullable', 'string', 'max:500'],
-        ]);
-
-        Room::create([
-            'nama'      => $data['roomNama'],
-            'lokasi'    => $data['roomLokasi'] ?: null,
-            'kapasitas' => (int) $data['roomKapasitas'],
-            'fasilitas' => $data['roomFasilitas'] ?: null,
-        ]);
-
-        $this->reset(['roomNama', 'roomLokasi', 'roomKapasitas', 'roomFasilitas']);
-        unset($this->rooms, $this->allRooms);
-        session()->flash('success', 'Ruangan berhasil ditambahkan.');
-    }
-
-    public function toggleRoom(int $id): void
-    {
-        $this->authorizeReviewer();
-        $room = Room::findOrFail($id);
-        $room->update(['status' => $room->status === 'tersedia' ? 'tidak_tersedia' : 'tersedia']);
-        unset($this->rooms, $this->allRooms);
     }
 
     private function authorizeReviewer(): void

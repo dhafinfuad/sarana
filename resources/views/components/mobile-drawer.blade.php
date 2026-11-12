@@ -147,7 +147,11 @@
                         @if(auth()->user()->canManageBookings())
                         <a wire:navigate.hover href="{{ route('ruangan.persetujuan') }}" @click="closeMobileDrawer()"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-xs transition text-left font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700">
-                            <span>Persetujuan &amp; Kelola Ruangan</span>
+                            <span>Persetujuan Peminjaman Ruangan</span>
+                        </a>
+                        <a wire:navigate.hover href="{{ route('ruangan.kelola') }}" @click="closeMobileDrawer()"
+                            class="w-full flex items-center gap-3 px-3 py-2.5 text-xs transition text-left font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700">
+                            <span>Kelola Ruangan</span>
                         </a>
                         @endif
                     </div>
