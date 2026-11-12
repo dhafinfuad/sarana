@@ -10,6 +10,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
+use Maatwebsite\Excel\Facades\Excel;
 use Tests\TestCase;
 
 class PermisiRiwayatTest extends TestCase
@@ -175,5 +176,55 @@ class PermisiRiwayatTest extends TestCase
         $this->assertSame(1, $k['total']);
         $this->assertSame('Kesehatan', $k['topKategori']->name);
         $this->assertSame(1, $k['pending']);
+    }
+    // ---- Tombol Permohonan & Export di halaman Persetujuan ----
+
+    public function test_persetujuan_buttons_depend_on_role(): void
+    {
+        // Administrator: Permohonan + Export
+        $this->actingAs($this->user('Administrator'))->get('/permisi/persetujuan')->assertOk()
+            ->assertSee('showApplicationModal = true', false)->assertSee('showExportModal = true', false)
+            ->assertSee('Form Pengajuan Permohonan Izin')->assertSee('Export Laporan Permohonan Izin');
+
+        // Kepala Seksi: Permohonan saja, tanpa Export
+        $this->actingAs($this->user('Kepala Seksi'))->get('/permisi/persetujuan')->assertOk()
+            ->assertSee('showApplicationModal = true', false)->assertDontSee('showExportModal = true', false)
+            ->assertDontSee('Export Laporan Permohonan Izin');
+
+        // Kepala Kantor definitif: tidak mengajukan dan tidak mengekspor
+        $this->actingAs($this->user('Kepala Kantor'))->get('/permisi/persetujuan')->assertOk()
+            ->assertDontSee('showApplicationModal = true', false)->assertDontSee('showExportModal = true', false);
+    }
+
+    public function test_reviewer_can_submit_own_permohonan_from_persetujuan_page(): void
+    {
+        $kepala = $this->user('Kepala Seksi');
+        Livewire::actingAs($kepala)->test(Dashboard::class)->set('isReviewerMode', true)
+            ->set('kategori', 'Kantor')->set('jenis', 'Permohonan')->set('keperluan', 'Rapat di luar kantor')
+            ->set('tanggalMulai', now()->addDay()->setTime(9, 0)->format('Y-m-d\TH:i'))
+            ->set('tanggalSelesai', now()->addDay()->setTime(12, 0)->format('Y-m-d\TH:i'))
+            ->call('submitApplication')->assertHasNoErrors();
+        $this->assertDatabaseHas('permisis', ['user_id' => $kepala->id, 'status' => 'pending', 'keperluan' => 'Rapat di luar kantor']);
+    }
+
+    public function test_export_downloads_xlsx_only_for_admin_and_subbag(): void
+    {
+        Excel::fake();
+        $u = $this->user();
+        foreach ([5, 7, 12] as $m) {
+            Permisi::create([
+                'user_id' => $u->id, 'kategori' => 'Kantor', 'jenis' => 'Permohonan', 'keperluan' => 'Dinas',
+                'tanggal_mulai' => now()->setDate(2026, $m, 10)->setTime(9, 0), 'tanggal_selesai' => now()->setDate(2026, $m, 10)->setTime(12, 0), 'status' => 'pending',
+            ]);
+        }
+
+        $url = '/permisi/export?start_month=5&start_year=2026&end_month=7&end_year=2026';
+        $this->actingAs($u)->get($url)->assertForbidden();
+        $this->actingAs($this->user('Kepala Seksi'))->get($url)->assertForbidden();
+
+        $this->actingAs($this->user('Administrator'))->get($url)->assertOk();
+        Excel::assertDownloaded('laporan-permohonan-izin-05-2026_sd_07-2026.xlsx', function (\App\Exports\PermisiExport $e) {
+            return $e->query()->count() === 2;
+        });
     }
 }

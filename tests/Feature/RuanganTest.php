@@ -11,6 +11,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
+use Maatwebsite\Excel\Facades\Excel;
 use Tests\TestCase;
 
 class RuanganTest extends TestCase
@@ -458,5 +459,48 @@ class RuanganTest extends TestCase
         $c = Livewire::actingAs($me)->test(Index::class);
         $this->assertSame(['pending' => 1, 'disetujui' => 1, 'gagal' => 2], $c->instance()->overview());
         $c->assertSee('Overview Status Peminjaman')->assertSee('Riwayat Peminjaman')->assertDontSee('TOTAL PENGAJUAN');
+    }
+    // ---- Tombol Peminjaman & Export di halaman Persetujuan ----
+
+    public function test_persetujuan_header_has_peminjaman_and_export_buttons_for_managers(): void
+    {
+        $this->actingAs($this->admin())->get('/ruangan/persetujuan')->assertOk()
+            ->assertSee('showModal = true', false)
+            ->assertSee('showExportModal = true', false)
+            ->assertSee('Form Pengajuan Peminjaman Ruangan')
+            ->assertSee('Export Laporan Peminjaman Ruangan')
+            ->assertSee('Unduh Laporan');
+    }
+
+    public function test_manager_can_submit_booking_from_persetujuan_page(): void
+    {
+        $room = $this->room();
+        $admin = $this->admin();
+
+        Livewire::actingAs($admin)->test(Index::class, ['mode' => 'reviewer'])
+            ->set('roomId', (string) $room->id)->set('keperluan', 'Rapat pimpinan')->set('jumlahPeserta', '4')
+            ->set('tanggalMulai', now()->addDay()->setTime(9, 0)->format('Y-m-d\TH:i'))
+            ->set('tanggalSelesai', now()->addDay()->setTime(10, 0)->format('Y-m-d\TH:i'))
+            ->call('submit')->assertHasNoErrors();
+
+        $this->assertDatabaseHas('room_bookings', ['user_id' => $admin->id, 'keperluan' => 'Rapat pimpinan', 'status' => 'pending']);
+    }
+
+    public function test_export_downloads_xlsx_for_the_chosen_period_for_managers_only(): void
+    {
+        Excel::fake();
+        $room = $this->room();
+        $u = $this->pegawai();
+        $this->booking($room, $u, now()->setDate(2026, 5, 10)->setTime(9, 0), now()->setDate(2026, 5, 10)->setTime(10, 0));
+        $this->booking($room, $u, now()->setDate(2026, 7, 10)->setTime(9, 0), now()->setDate(2026, 7, 10)->setTime(10, 0));
+        $this->booking($room, $u, now()->setDate(2026, 12, 10)->setTime(9, 0), now()->setDate(2026, 12, 10)->setTime(10, 0));
+
+        $this->actingAs($u)->get('/ruangan/export?start_month=1&start_year=2026&end_month=12&end_year=2026')->assertForbidden();
+
+        // periode terbalik otomatis ditukar (Juli..Mei -> Mei..Juli): 2 data
+        $this->actingAs($this->admin())->get('/ruangan/export?start_month=7&start_year=2026&end_month=5&end_year=2026')->assertOk();
+        Excel::assertDownloaded('laporan-peminjaman-ruangan-05-2026_sd_07-2026.xlsx', function (\App\Exports\RuanganBookingsExport $e) {
+            return $e->query()->count() === 2;
+        });
     }
 }

@@ -140,6 +140,7 @@ Route::middleware(['auth'])
          */
         Route::get('/permisi/permohonan', App\Livewire\Permisi\Dashboard::class)->name('permisi.permohonan');
         Route::get('/permisi/riwayat', App\Livewire\Permisi\Riwayat::class)->name('permisi.riwayat');
+        Route::get('/permisi/export', [\App\Http\Controllers\PersetujuanExportController::class, 'permisi'])->name('permisi.export');
 
         /**
          * GET /permisi/persetujuan — Halaman Persetujuan Permisi (Reviewer)
@@ -158,6 +159,7 @@ Route::middleware(['auth'])
         Route::get('/ruangan/persetujuan', \App\Livewire\Ruangan\Index::class)->defaults('mode', 'reviewer')->name('ruangan.persetujuan');
         Route::get('/ruangan/kelola', \App\Livewire\Ruangan\Kelola::class)->name('ruangan.kelola');
         Route::get('/ruangan/riwayat', \App\Livewire\Ruangan\Riwayat::class)->name('ruangan.riwayat');
+        Route::get('/ruangan/export', [\App\Http\Controllers\PersetujuanExportController::class, 'ruangan'])->name('ruangan.export');
 
         /**
          * BONA — Bon ATK (Permintaan)
