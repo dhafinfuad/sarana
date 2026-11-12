@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Livewire\Ruangan\Index;
+use App\Livewire\Ruangan\Kelola;
 use App\Models\Room;
 use App\Models\RoomBooking;
 use App\Models\User;
@@ -162,5 +163,66 @@ class RuanganTest extends TestCase
 
         Livewire::actingAs($owner)->test(Index::class)->call('cancel', $booking->id);
         $this->assertSame('dibatalkan', $booking->fresh()->status);
+    }
+    // ---- Kelola Ruangan ----
+
+    public function test_pegawai_cannot_open_kelola_page(): void
+    {
+        $this->actingAs($this->pegawai())->get('/ruangan/kelola')->assertForbidden();
+    }
+
+    public function test_admin_can_open_kelola_page(): void
+    {
+        $this->actingAs($this->admin())->get('/ruangan/kelola')->assertOk()->assertSee('Tambah Ruangan');
+    }
+
+    public function test_admin_can_add_edit_and_toggle_room(): void
+    {
+        $admin = $this->admin();
+
+        Livewire::actingAs($admin)->test(Kelola::class)
+            ->set('nama', 'Aula')->set('lokasi', 'Lantai 1')->set('kapasitas', '50')->set('fasilitas', 'Sound system')
+            ->call('save')->assertHasNoErrors();
+
+        $room = Room::where('nama', 'Aula')->firstOrFail();
+        $this->assertSame(50, $room->kapasitas);
+
+        Livewire::actingAs($admin)->test(Kelola::class)
+            ->call('edit', $room->id)
+            ->assertSet('nama', 'Aula')
+            ->set('kapasitas', '60')
+            ->call('update')->assertHasNoErrors();
+        $this->assertSame(60, $room->fresh()->kapasitas);
+
+        Livewire::actingAs($admin)->test(Kelola::class)->call('toggleStatus', $room->id);
+        $this->assertSame('tidak_tersedia', $room->fresh()->status);
+        Livewire::actingAs($admin)->test(Kelola::class)->call('toggleStatus', $room->id);
+        $this->assertSame('tersedia', $room->fresh()->status);
+    }
+
+    public function test_duplicate_room_name_is_rejected_but_own_name_is_allowed_on_edit(): void
+    {
+        $admin = $this->admin();
+        $a = $this->room(['nama' => 'Ruang A']);
+        $this->room(['nama' => 'Ruang B']);
+
+        Livewire::actingAs($admin)->test(Kelola::class)
+            ->set('nama', 'Ruang A')->set('kapasitas', '5')->call('save')
+            ->assertHasErrors(['nama']);
+
+        Livewire::actingAs($admin)->test(Kelola::class)
+            ->call('edit', $a->id)->set('kapasitas', '7')->call('update')
+            ->assertHasNoErrors();
+    }
+
+    public function test_deactivated_room_is_not_offered_for_booking(): void
+    {
+        $room = $this->room(['status' => 'tidak_tersedia']);
+
+        Livewire::actingAs($this->pegawai())->test(Index::class)
+            ->set('roomId', (string) $room->id)->set('keperluan', 'Rapat koordinasi')->set('jumlahPeserta', '2')
+            ->set('tanggalMulai', now()->addDay()->format('Y-m-d\TH:i'))
+            ->set('tanggalSelesai', now()->addDay()->addHour()->format('Y-m-d\TH:i'))
+            ->call('submit')->assertHasErrors(['roomId']);
     }
 }

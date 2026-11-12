@@ -155,6 +155,7 @@ Route::middleware(['auth'])
          */
         Route::get('/ruangan/peminjaman', \App\Livewire\Ruangan\Index::class)->name('ruangan.peminjaman');
         Route::get('/ruangan/persetujuan', \App\Livewire\Ruangan\Index::class)->defaults('mode', 'reviewer')->name('ruangan.persetujuan');
+        Route::get('/ruangan/kelola', \App\Livewire\Ruangan\Kelola::class)->name('ruangan.kelola');
 
         /**
          * BONA — Bon ATK (Permintaan)
