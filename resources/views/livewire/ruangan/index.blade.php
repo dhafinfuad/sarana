@@ -16,11 +16,24 @@
             </div>
 
             @if(!$isReviewerMode)
-                <button @click="showModal = true" type="button"
-                    class="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-sm shadow-brand-600/30 transition flex items-center gap-2 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                    <span>Ajukan Peminjaman</span>
-                </button>
+                <div class="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+                    @if(auth()->user()->canManageBookings())
+                        <a wire:navigate.hover href="{{ route('ruangan.persetujuan') }}"
+                            class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs transition">
+                            Persetujuan &amp; Kelola Ruangan
+                        </a>
+                    @endif
+                    <button @click="showModal = true" type="button"
+                        class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-sm shadow-brand-600/30 transition flex items-center gap-2 cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                        <span>Ajukan Peminjaman</span>
+                    </button>
+                </div>
+            @else
+                <a wire:navigate.hover href="{{ route('ruangan.peminjaman') }}"
+                    class="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs transition">
+                    Ajukan Peminjaman Saya
+                </a>
             @endif
         </div>
 
