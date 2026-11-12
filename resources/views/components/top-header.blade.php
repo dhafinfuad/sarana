@@ -109,15 +109,39 @@
                     </div>
                     @endif
 
-                    <!-- Ruangan -->
-                    @if(auth()->user()->canAccessPeminjaman())
-                    <a wire:navigate.hover href="{{ route('ruangan.peminjaman') }}" @class([
-                        'nav-item flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer',
-                        'bg-brand-50 text-brand-700 shadow-2xs' => request()->routeIs('ruangan.*'),
-                        'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80' => !request()->routeIs('ruangan.*'),
-                    ])>
-                        <span>Ruangan</span>
-                    </a>
+                    <!-- Ruangan Dropdown -->
+                    @if(auth()->user()->canAccessPeminjaman() || auth()->user()->canManageBookings())
+                    <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                        <button @click="open = !open" @class([
+                            'nav-item flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer',
+                            'bg-brand-50 text-brand-700 shadow-2xs' => request()->routeIs('ruangan.*'),
+                            'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80' => !request()->routeIs('ruangan.*'),
+                        ])>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                            <span>Ruangan</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+
+                        <div x-show="open" x-transition.opacity style="display: none;"
+                            class="absolute left-0 mt-1.5 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-50">
+                            @if(auth()->user()->canAccessPeminjaman())
+                            <a wire:navigate.hover href="{{ route('ruangan.peminjaman') }}" class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <span>Peminjaman</span>
+                            </a>
+                            @endif
+                            @if(auth()->user()->canManageBookings())
+                            <a wire:navigate.hover href="{{ route('ruangan.persetujuan') }}" class="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-slate-700 hover:text-brand-600 hover:bg-brand-50/60 flex items-center gap-2.5 transition">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>Persetujuan &amp; Kelola Ruangan</span>
+                            </a>
+                            @endif
+                        </div>
+                    </div>
                     @endif
 
                     <!-- Asmara Dropdown -->

@@ -134,13 +134,23 @@
                 @endif
 
                 <!-- Ruangan -->
-                @if(auth()->user()->canAccessPeminjaman())
+                @if(auth()->user()->canAccessPeminjaman() || auth()->user()->canManageBookings())
                 <div class="pt-2 border-t border-slate-100">
                     <p class="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Peminjaman Ruangan</p>
-                    <a wire:navigate.hover href="{{ route('ruangan.peminjaman') }}" @click="closeMobileDrawer()"
-                        class="w-full flex items-center gap-3 px-3 py-2.5 text-xs transition text-left font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700">
-                        <span>Ajukan Peminjaman Ruangan</span>
-                    </a>
+                    <div class="space-y-1">
+                        @if(auth()->user()->canAccessPeminjaman())
+                        <a wire:navigate.hover href="{{ route('ruangan.peminjaman') }}" @click="closeMobileDrawer()"
+                            class="w-full flex items-center gap-3 px-3 py-2.5 text-xs transition text-left font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700">
+                            <span>Ajukan Peminjaman Ruangan</span>
+                        </a>
+                        @endif
+                        @if(auth()->user()->canManageBookings())
+                        <a wire:navigate.hover href="{{ route('ruangan.persetujuan') }}" @click="closeMobileDrawer()"
+                            class="w-full flex items-center gap-3 px-3 py-2.5 text-xs transition text-left font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700">
+                            <span>Persetujuan &amp; Kelola Ruangan</span>
+                        </a>
+                        @endif
+                    </div>
                 </div>
                 @endif
 
