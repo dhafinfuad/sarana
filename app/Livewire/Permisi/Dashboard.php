@@ -126,8 +126,13 @@ class Dashboard extends Component
         return [];
     }
 
-    #[Computed]
-    public function permisis(): LengthAwarePaginator
+    /**
+     * Query dasar daftar persetujuan. Tanpa $withFilters hanya pembatasan hak akses peran
+     * (dipakai untuk lencana "Menunggu"); dengan filter ikut pencarian, status, seksi, dan tanggal.
+     *
+     * @return Builder<Permisi>
+     */
+    private function filteredQuery(bool $withFilters = true): Builder
     {
         $user = Auth::user();
         
@@ -171,12 +176,16 @@ class Dashboard extends Component
             }
 
             // Filter Seksi (jika dipilih)
-            if ($this->filterSeksi) {
+            if ($withFilters && $this->filterSeksi) {
                 $query->whereHas('user', fn(Builder $q) => $q->where('seksi', $this->filterSeksi));
             }
         } else {
             // Mode Permohonan (Milik sendiri)
             $query->where('user_id', $user->id);
+        }
+
+        if (! $withFilters) {
+            return $query;
         }
 
         // Filter: Search (Keperluan atau Nama Pegawai)
@@ -204,6 +213,14 @@ class Dashboard extends Component
         if ($this->endDate) {
             $query->whereDate('tanggal_selesai', '<=', $this->endDate);
         }
+
+        return $query;
+    }
+
+    #[Computed]
+    public function permisis(): LengthAwarePaginator
+    {
+        $query = $this->filteredQuery();
 
         // Sorting
         if ($this->sortField === 'user.name') {
@@ -261,49 +278,26 @@ class Dashboard extends Component
         ];
     }
 
+    /**
+     * Ringkasan untuk kartu KPI mode Persetujuan, mengikuti filter tabel (seperti /admin/dashboard).
+     *
+     * @return array{total: int, topKategori: ?object, topSeksi: ?object, topPegawai: ?object, pending: int}
+     */
     #[Computed]
     public function analytics(): array
     {
-        $user = Auth::user();
-        $query = Permisi::query();
-        
-        if ($this->isReviewerMode) {
-            if ($user->isSubbagUmum() || $user->isAdministrator()) {
-                // No filter
-            } elseif ($user->isKepalaKantor()) {
-                $query->whereHas('user', function (Builder $q) use ($user) {
-                    $q->where(function (Builder $sub) use ($user) {
-                        $sub->whereIn('jabatan', ['Kepala Seksi', 'Supervisor']);
-                        if ($user->jabatan === 'Kepala Seksi') {
-                            $managedSeksi = $user->getManagedSeksiList();
-                            $sub->orWhere(function (Builder $sub2) use ($managedSeksi) {
-                                $sub2->whereIn('seksi', $managedSeksi)
-                                     ->where('jabatan', '!=', 'Kepala Seksi');
-                            });
-                        }
-                    })->where('id', '!=', $user->id);
-                });
-            } elseif ($user->isSupervisor()) {
-                $query->whereHas('user', fn($q) => $q->where('tim', $user->tim)->where('jabatan', 'FPP')->where('id', '!=', $user->id));
-            } elseif ($user->isKepalaSeksi()) {
-                $managedSeksi = $user->getManagedSeksiList();
-                $query->whereHas('user', fn($q) => $q->whereIn('seksi', $managedSeksi)->where('jabatan', '!=', 'Kepala Seksi')->where('id', '!=', $user->id));
-            }
-
-            if ($this->filterSeksi) {
-                $query->whereHas('user', fn(Builder $q) => $q->where('seksi', $this->filterSeksi));
-            }
-        } else {
-            $query->where('user_id', $user->id);
-        }
-
-        $baseQuery = clone $query;
+        $base = fn () => $this->filteredQuery()->setEagerLoads([]);
+        $joined = fn () => $base()->join('users as u', 'u.id', '=', 'permisis.user_id')->orderByDesc('total');
 
         return [
-            'total' => (clone $baseQuery)->count(),
-            'pending' => (clone $baseQuery)->where('status', 'pending')->count(),
-            'disetujui' => (clone $baseQuery)->where('status', 'disetujui')->count(),
-            'ditolak' => (clone $baseQuery)->where('status', 'ditolak')->count(),
+            'total'       => $base()->count(),
+            'topKategori' => $base()->selectRaw('permisis.kategori as name, COUNT(*) as total')
+                ->groupBy('permisis.kategori')->orderByDesc('total')->first(),
+            'topSeksi'    => $joined()->selectRaw('u.seksi as name, COUNT(*) as total')
+                ->whereNotNull('u.seksi')->where('u.seksi', '!=', '')->groupBy('u.seksi')->first(),
+            'topPegawai'  => $joined()->selectRaw('u.name as name, COUNT(*) as total')
+                ->groupBy('u.id', 'u.name')->first(),
+            'pending'     => $this->filteredQuery(false)->where('permisis.status', 'pending')->count(),
         ];
     }
 

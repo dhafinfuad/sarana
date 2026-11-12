@@ -31,6 +31,10 @@ class Index extends Component
     public bool $isReviewerMode = false;
     public string $status = '';
     public string $search = '';
+    public string $startDate = '';
+    public string $endDate = '';
+    public string $sortField = 'tanggal_mulai';
+    public string $sortDirection = 'desc';
 
     // Form peminjaman
     public ?int $editId = null;
@@ -64,6 +68,30 @@ class Index extends Component
         $this->resetPage();
     }
 
+    public function updatingStartDate(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingEndDate(): void
+    {
+        $this->resetPage();
+    }
+
+    public function sortBy(string $field): void
+    {
+        if (! in_array($field, ['user.name', 'room.nama', 'keperluan', 'tanggal_mulai', 'tanggal_selesai', 'status'], true)) {
+            return;
+        }
+
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+    }
+
     #[Computed]
     public function rooms()
     {
@@ -78,23 +106,26 @@ class Index extends Component
     }
 
     /**
-     * Ringkasan jumlah pengajuan untuk kartu KPI di halaman Persetujuan.
+     * Ringkasan untuk kartu KPI halaman Persetujuan, mengikuti filter tabel (seperti /admin/dashboard).
      *
-     * @return array{total: int, pending: int, disetujui: int, ditolak: int}
+     * @return array{total: int, topRoom: ?object, topSeksi: ?object, topPegawai: ?object, pending: int}
      */
     #[Computed]
     public function analytics(): array
     {
-        $counts = RoomBooking::query()
-            ->selectRaw('status, COUNT(*) as total')
-            ->groupBy('status')
-            ->pluck('total', 'status');
+        $base = fn () => $this->filteredQuery()->setEagerLoads([]);
+        $users = fn () => $base()->join('users as u', 'u.id', '=', 'room_bookings.user_id')->orderByDesc('total');
 
         return [
-            'total'     => (int) $counts->sum(),
-            'pending'   => (int) ($counts['pending'] ?? 0),
-            'disetujui' => (int) ($counts['disetujui'] ?? 0),
-            'ditolak'   => (int) ($counts['ditolak'] ?? 0),
+            'total'      => $base()->count(),
+            'topRoom'    => $base()->join('rooms as r', 'r.id', '=', 'room_bookings.room_id')
+                ->selectRaw('r.nama as name, r.kapasitas as kapasitas, COUNT(*) as total')
+                ->groupBy('r.id', 'r.nama', 'r.kapasitas')->orderByDesc('total')->first(),
+            'topSeksi'   => $users()->selectRaw('u.seksi as name, COUNT(*) as total')
+                ->whereNotNull('u.seksi')->where('u.seksi', '!=', '')->groupBy('u.seksi')->first(),
+            'topPegawai' => $users()->selectRaw('u.name as name, COUNT(*) as total')
+                ->groupBy('u.id', 'u.name')->first(),
+            'pending'    => RoomBooking::where('status', 'pending')->count(),
         ];
     }
 
@@ -116,29 +147,57 @@ class Index extends Component
         ];
     }
 
-    #[Computed]
-    public function bookings(): LengthAwarePaginator
+    /**
+     * Query daftar: mode Peminjaman hanya milik sendiri; mode Persetujuan semua, dengan filter
+     * pencarian, status, dan rentang tanggal (sama dengan yang dipakai kartu KPI).
+     *
+     * @return \Illuminate\Database\Eloquent\Builder<RoomBooking>
+     */
+    private function filteredQuery(): \Illuminate\Database\Eloquent\Builder
     {
         $query = RoomBooking::with(['room', 'user', 'processor']);
 
         if (! $this->isReviewerMode) {
-            $query->where('user_id', Auth::user()->id);
+            $query->where('room_bookings.user_id', Auth::user()->id);
         }
 
         if ($this->status !== '') {
-            $query->where('status', $this->status);
+            $query->where('room_bookings.status', $this->status);
         }
 
         if ($this->search !== '') {
             $term = '%' . $this->search . '%';
             $query->where(function ($q) use ($term) {
-                $q->where('keperluan', 'like', $term)
+                $q->where('room_bookings.keperluan', 'like', $term)
                   ->orWhereHas('room', fn ($r) => $r->where('nama', 'like', $term))
-                  ->orWhereHas('user', fn ($u) => $u->where('name', 'like', $term));
+                  ->orWhereHas('user', fn ($u) => $u->where('name', 'like', $term)->orWhere('seksi', 'like', $term));
             });
         }
 
-        $page = $query->latest('tanggal_mulai')->paginate(10);
+        if ($this->startDate !== '') {
+            $query->whereDate('room_bookings.tanggal_mulai', '>=', $this->startDate);
+        }
+        if ($this->endDate !== '') {
+            $query->whereDate('room_bookings.tanggal_selesai', '<=', $this->endDate);
+        }
+
+        return $query;
+    }
+
+    #[Computed]
+    public function bookings(): LengthAwarePaginator
+    {
+        $query = $this->filteredQuery();
+
+        if ($this->sortField === 'user.name') {
+            $query->orderBy(\App\Models\User::select('name')->whereColumn('users.id', 'room_bookings.user_id'), $this->sortDirection);
+        } elseif ($this->sortField === 'room.nama') {
+            $query->orderBy(Room::select('nama')->whereColumn('rooms.id', 'room_bookings.room_id'), $this->sortDirection);
+        } else {
+            $query->orderBy('room_bookings.' . $this->sortField, $this->sortDirection);
+        }
+
+        $page = $query->orderByDesc('room_bookings.id')->paginate(10);
 
         $this->decorate($page->getCollection());
 

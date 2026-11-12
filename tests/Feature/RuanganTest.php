@@ -380,26 +380,63 @@ class RuanganTest extends TestCase
 
         $this->assertDatabaseMissing('room_bookings', ['id' => $b->id]);
     }
-    public function test_persetujuan_kpi_cards_count_by_status_and_filter_on_click(): void
+    public function test_persetujuan_kpi_follow_the_table_filters(): void
+    {
+        $utama = $this->room(['nama' => 'Ruang Utama', 'kapasitas' => 12]);
+        $kecil = $this->room(['nama' => 'Ruang Kecil', 'kapasitas' => 4]);
+        $a = $this->makeUser(['jabatan' => 'Pelaksana', 'seksi' => 'Seksi Pelayanan', 'name' => 'Andi']);
+        $b = $this->makeUser(['jabatan' => 'Pelaksana', 'seksi' => 'Seksi Umum', 'name' => 'Budi']);
+        $t = fn (int $d) => now()->addDays($d)->setTime(9, 0);
+        $this->booking($utama, $a, $t(1), $t(1)->copy()->addHour(), 'pending');
+        $this->booking($utama, $a, $t(2), $t(2)->copy()->addHour(), 'disetujui');
+        $this->booking($utama, $a, $t(3), $t(3)->copy()->addHour(), 'disetujui');
+        $this->booking($kecil, $b, $t(4), $t(4)->copy()->addHour(), 'ditolak');
+
+        $c = Livewire::actingAs($this->admin())->test(Index::class, ['mode' => 'reviewer']);
+        $k = $c->instance()->analytics();
+        $this->assertSame(4, $k['total']);
+        $this->assertSame(['Ruang Utama', 3], [$k['topRoom']->name, (int) $k['topRoom']->total]);
+        $this->assertSame(12, (int) $k['topRoom']->kapasitas);
+        $this->assertSame(['Seksi Pelayanan', 3], [$k['topSeksi']->name, (int) $k['topSeksi']->total]);
+        $this->assertSame(['Andi', 3], [$k['topPegawai']->name, (int) $k['topPegawai']->total]);
+        $this->assertSame(1, $k['pending']);
+
+        // KPI mengikuti filter tabel (status), lencana "Menunggu" tidak
+        $c->set('status', 'ditolak');
+        $k = $c->instance()->analytics();
+        $this->assertSame(1, $k['total']);
+        $this->assertSame('Ruang Kecil', $k['topRoom']->name);
+        $this->assertSame('Budi', $k['topPegawai']->name);
+        $this->assertSame(1, $k['pending']);
+    }
+
+    public function test_persetujuan_page_has_dashboard_layout_elements(): void
+    {
+        $room = $this->room();
+        $this->booking($room, $this->pegawai(), now()->addDay()->setTime(9, 0), now()->addDay()->setTime(10, 0));
+
+        $this->actingAs($this->admin())->get('/ruangan/persetujuan')->assertOk()
+            ->assertSee('Total Peminjaman')->assertSee('Top Ruangan')->assertSee('Top Seksi')->assertSee('Top Pegawai')
+            ->assertSee('Manajemen Peminjaman Ruangan')->assertSee('1 Menunggu')->assertSee('Reset Filter')
+            ->assertDontSee('TOTAL PENGAJUAN');
+    }
+
+    public function test_persetujuan_date_filter_and_sorting(): void
     {
         $room = $this->room();
         $u = $this->pegawai();
-        $t = fn (int $h) => now()->addDay()->setTime($h, 0);
-        $this->booking($room, $u, $t(8), $t(9), 'pending');
-        $this->booking($room, $u, $t(10), $t(11), 'pending');
-        $this->booking($room, $u, $t(12), $t(13), 'disetujui');
-        $this->booking($room, $u, $t(14), $t(15), 'ditolak');
-        $this->booking($room, $u, $t(16), $t(17), 'dibatalkan');
+        $early = $this->booking($room, $u, now()->addDays(2)->setTime(9, 0), now()->addDays(2)->setTime(10, 0));
+        $late = $this->booking($room, $u, now()->addDays(9)->setTime(9, 0), now()->addDays(9)->setTime(10, 0));
 
         $c = Livewire::actingAs($this->admin())->test(Index::class, ['mode' => 'reviewer']);
-        $this->assertSame(
-            ['total' => 5, 'pending' => 2, 'disetujui' => 1, 'ditolak' => 1],
-            $c->instance()->analytics()
-        );
-        $c->assertSee('TOTAL PENGAJUAN')->assertSee('DISETUJUI')->assertSee('DITOLAK');
+        $this->assertSame($late->id, $c->instance()->bookings()->first()->id);          // default: mulai terbaru dulu
 
-        $c->set('status', 'pending');
-        $this->assertCount(2, $c->instance()->bookings());
+        $c->call('sortBy', 'tanggal_mulai');                                            // klik kolom: asc
+        $this->assertSame($early->id, $c->instance()->bookings()->first()->id);
+
+        $c->set('startDate', now()->addDays(5)->toDateString());
+        $this->assertSame([$late->id], $c->instance()->bookings()->pluck('id')->all());
+        $this->assertSame(1, $c->instance()->analytics()['total']);
     }
 
     public function test_kpi_cards_are_not_shown_on_peminjaman_page(): void
