@@ -1,4 +1,4 @@
-<div x-data="{ showDetailModal: false, detail: { title: '', badge: {}, rows: [] } }">
+<div x-data="{ showDetailModal: false, detail: {} }">
 
     @if(!auth()->user()->canAccessAdminDashboard())
         <x-top-header title="Riwayat Peminjaman Ruangan" />
@@ -41,17 +41,17 @@
                         @forelse($this->bookings as $row)
                             @php
                                 $badge = \App\Support\StatusBadge::for($row->status);
-                                $payload = [
-                                    'title' => $row->room->nama,
-                                    'badge' => $badge,
-                                    'rows' => [
-                                        ['Keperluan', $row->keperluan],
-                                        ['Jumlah Peserta', $row->jumlah_peserta . ' orang'],
-                                        ['Waktu Mulai', $row->tanggal_mulai->translatedFormat('d M Y H:i')],
-                                        ['Waktu Selesai', $row->tanggal_selesai->translatedFormat('d M Y H:i')],
-                                        ['Diajukan', $row->created_at->translatedFormat('d M Y H:i')],
-                                    ],
-                                ];
+                                $payload = \App\Support\RiwayatDetail::make(
+                                title: 'Detail Peminjaman',
+                                code: 'REQ-' . $row->created_at->format('Y') . '-' . str_pad((string) $row->id, 4, '0', STR_PAD_LEFT),
+                                status: $row->status,
+                                mulai: $row->tanggal_mulai->translatedFormat('d M Y H:i'),
+                                selesai: $row->tanggal_selesai->translatedFormat('d M Y H:i'),
+                                pairs: [[['Ruangan', $row->room->nama, 'bold'], ['Jumlah Peserta', $row->jumlah_peserta . ' orang', 'chip']]],
+                                noteLabel: 'Keperluan',
+                                noteHeading: $row->room->lokasi,
+                                noteText: $row->keperluan,
+                            );
                             @endphp
                             <tr class="hover:bg-slate-50/60 transition-colors" wire:key="riwayat-{{ $row->id }}">
                                 <td class="py-4 px-6 font-bold text-slate-900">{{ $row->room->nama }}</td>

@@ -1,7 +1,7 @@
 <div x-data="{
     showApplicationModal: false,
     showDetailModal: false,
-    detail: { title: '', badge: {}, rows: [] },
+    detail: {},
     showEditModal: false,
     kategori: @entangle('kategori'),
     jenis: @entangle('jenis'),
@@ -591,17 +591,20 @@
                     @forelse($this->recent as $item)
                         @php
                             $badge = \App\Support\StatusBadge::for($item->status);
-                            $payload = [
-                                'title' => $item->kategori . ' - ' . $item->jenis,
-                                'badge' => $badge,
-                                'rows' => array_values(array_filter([
-                                    ['Keperluan', $item->keperluan],
-                                    ['Waktu Mulai', $item->tanggal_mulai->translatedFormat('d M Y H:i')],
-                                    ['Waktu Selesai', $item->tanggal_selesai->translatedFormat('d M Y H:i')],
-                                    ['Diajukan', $item->created_at->translatedFormat('d M Y H:i')],
-                                    $item->processor ? ['Diproses Oleh', $item->processor->name . ($item->processed_at ? ' (' . $item->processed_at->translatedFormat('d M Y H:i') . ')' : '')] : null,
+                            $payload = \App\Support\RiwayatDetail::make(
+                                title: 'Detail Permohonan',
+                                code: 'REQ-' . $item->created_at->format('Y') . '-' . str_pad((string) $item->id, 4, '0', STR_PAD_LEFT),
+                                status: $item->status,
+                                mulai: $item->tanggal_mulai->translatedFormat('d M Y H:i'),
+                                selesai: $item->tanggal_selesai->translatedFormat('d M Y H:i'),
+                                pairs: array_values(array_filter([
+                                    [['Kategori', $item->kategori, 'bold'], ['Jenis', $item->jenis, 'chip']],
+                                    $item->processor ? [['Diproses Oleh', $item->processor->name, 'bold'], ['Waktu Diproses', $item->processed_at ? $item->processed_at->translatedFormat('d M Y H:i') : '-', 'normal']] : null,
                                 ])),
-                            ];
+                                noteLabel: 'Keperluan',
+                                noteHeading: null,
+                                noteText: $item->keperluan,
+                            );
                         @endphp
                         <div class="p-5 flex flex-wrap items-center justify-between gap-3 hover:bg-slate-50/70 transition" wire:key="recent-{{ $item->id }}">
                             <div class="flex items-center gap-3.5 min-w-0">

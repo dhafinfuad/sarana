@@ -76,7 +76,7 @@ class PermisiRiwayatTest extends TestCase
         $c->assertSee('Lihat Semua Riwayat')->assertSee('Overview Status Permohonan')->assertDontSee('Semua Status');
     }
 
-    public function test_actions_visible_only_for_pending_unless_privileged_role(): void
+    public function test_actions_visible_only_for_pending_for_every_role(): void
     {
         $u = $this->user();
         $this->permisi($u, 'pending', 2);
@@ -86,9 +86,11 @@ class PermisiRiwayatTest extends TestCase
         $this->assertTrue((bool) $recent->firstWhere('status', 'pending')->show_actions);
         $this->assertFalse((bool) $recent->firstWhere('status', 'disetujui')->show_actions);
 
-        $kepala = $this->user('Kepala Seksi');
-        $this->permisi($kepala, 'disetujui');
-        $this->assertTrue((bool) Livewire::actingAs($kepala)->test(Dashboard::class)->instance()->recent()->first()->show_actions);
+        foreach (['Kepala Seksi', 'Administrator'] as $jabatan) {
+            $x = $this->user($jabatan);
+            $this->permisi($x, 'disetujui');
+            $this->assertFalse((bool) Livewire::actingAs($x)->test(Dashboard::class)->instance()->recent()->first()->show_actions);
+        }
     }
 
     public function test_delete_rules_for_pemohon(): void
@@ -108,15 +110,20 @@ class PermisiRiwayatTest extends TestCase
         $this->assertDatabaseMissing('permisis', ['id' => $pending->id]);   // Pending: langsung boleh
     }
 
-    public function test_privileged_roles_can_delete_and_edit_own_request_of_any_status(): void
+    public function test_every_role_can_only_edit_and_delete_own_pending_request(): void
     {
-        foreach (['Kepala Seksi', 'Administrator'] as $jabatan) {
+        foreach (['Kepala Seksi', 'Administrator', 'Pelaksana'] as $jabatan) {
             $u = $this->user($jabatan);
-            $p = $this->permisi($u, 'disetujui');
+            $done = $this->permisi($u, 'disetujui');
+            $pending = $this->permisi($u, 'pending', 3);
 
-            Livewire::actingAs($u)->test(Dashboard::class)->call('editBooking', $p->id)->assertSet('editId', $p->id);
-            Livewire::actingAs($u)->test(Dashboard::class)->call('deleteBooking', $p->id);
-            $this->assertDatabaseMissing('permisis', ['id' => $p->id]);
+            Livewire::actingAs($u)->test(Dashboard::class)->call('editBooking', $done->id)->assertSet('editId', null);
+            Livewire::actingAs($u)->test(Dashboard::class)->call('deleteBooking', $done->id);
+            $this->assertDatabaseHas('permisis', ['id' => $done->id]);
+
+            Livewire::actingAs($u)->test(Dashboard::class)->call('editBooking', $pending->id)->assertSet('editId', $pending->id);
+            Livewire::actingAs($u)->test(Dashboard::class)->call('deleteBooking', $pending->id);
+            $this->assertDatabaseMissing('permisis', ['id' => $pending->id]);
         }
     }
 

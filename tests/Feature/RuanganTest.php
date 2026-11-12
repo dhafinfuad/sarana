@@ -308,20 +308,27 @@ class RuanganTest extends TestCase
         $this->assertDatabaseMissing('room_bookings', ['id' => $pending->id]);
     }
 
-    public function test_roles_that_see_all_actions_can_edit_and_delete_own_booking_of_any_status(): void
+    public function test_all_roles_can_only_edit_and_delete_own_pending_booking_on_peminjaman_page(): void
     {
         $room = $this->room();
-        foreach (['Kepala Seksi', 'Administrator'] as $i => $jabatan) {
+        foreach (['Kepala Seksi', 'Administrator', 'Pelaksana'] as $i => $jabatan) {
             $u = $this->makeUser(['jabatan' => $jabatan, 'seksi' => 'Seksi Pelayanan']);
-            $b = $this->booking($room, $u, now()->addDays($i + 1)->setTime(9, 0), now()->addDays($i + 1)->setTime(10, 0), 'disetujui');
+            $approved = $this->booking($room, $u, now()->addDays($i * 2 + 1)->setTime(9, 0), now()->addDays($i * 2 + 1)->setTime(10, 0), 'disetujui');
+            $pending = $this->booking($room, $u, now()->addDays($i * 2 + 2)->setTime(9, 0), now()->addDays($i * 2 + 2)->setTime(10, 0));
 
-            Livewire::actingAs($u)->test(Index::class)->call('edit', $b->id)->assertSet('editId', $b->id);
-            Livewire::actingAs($u)->test(Index::class)->call('delete', $b->id);
-            $this->assertDatabaseMissing('room_bookings', ['id' => $b->id]);
+            // status selain Pending: semua peran ditolak (termasuk Administrator di halaman pemohon)
+            Livewire::actingAs($u)->test(Index::class)->call('edit', $approved->id)->assertSet('editId', null);
+            Livewire::actingAs($u)->test(Index::class)->call('delete', $approved->id);
+            $this->assertDatabaseHas('room_bookings', ['id' => $approved->id]);
+
+            // Pending milik sendiri: boleh
+            Livewire::actingAs($u)->test(Index::class)->call('edit', $pending->id)->assertSet('editId', $pending->id);
+            Livewire::actingAs($u)->test(Index::class)->call('delete', $pending->id);
+            $this->assertDatabaseMissing('room_bookings', ['id' => $pending->id]);
         }
     }
 
-    public function test_recent_list_shows_only_five_newest_and_hides_actions_unless_pending_or_privileged(): void
+    public function test_recent_list_shows_only_five_newest_and_actions_only_for_pending(): void
     {
         $room = $this->room();
         $u = $this->pegawai();
@@ -337,9 +344,10 @@ class RuanganTest extends TestCase
         $this->assertFalse((bool) $recent->last()->show_actions);          // Disetujui: aksi disembunyikan
         $c->assertSee('Lihat Semua Riwayat')->assertDontSee('Semua Status');
 
+        // semua peran sama: hanya Pending yang menampilkan tombol aksi
         $kepala = $this->makeUser(['jabatan' => 'Kepala Seksi', 'seksi' => 'Seksi Pelayanan']);
         $this->booking($room, $kepala, now()->addDays(20)->setTime(9, 0), now()->addDays(20)->setTime(10, 0), 'disetujui');
-        $this->assertTrue((bool) Livewire::actingAs($kepala)->test(Index::class)->instance()->recent()->first()->show_actions);
+        $this->assertFalse((bool) Livewire::actingAs($kepala)->test(Index::class)->instance()->recent()->first()->show_actions);
     }
 
     public function test_riwayat_page_lists_all_with_filter_and_pagination(): void
