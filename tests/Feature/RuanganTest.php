@@ -282,7 +282,7 @@ class RuanganTest extends TestCase
             ->call('update')->assertHasErrors(['tanggalMulai']);
     }
 
-    public function test_pemohon_can_edit_only_own_pending_and_delete_only_closed(): void
+    public function test_pemohon_can_edit_and_delete_only_own_pending(): void
     {
         $room = $this->room();
         $owner = $this->pegawai();
@@ -293,19 +293,75 @@ class RuanganTest extends TestCase
 
         // orang lain tidak bisa mengedit / menghapus
         Livewire::actingAs($other)->test(Index::class)->call('edit', $pending->id)->assertSet('editId', null);
-        Livewire::actingAs($other)->test(Index::class)->call('delete', $rejected->id);
+        Livewire::actingAs($other)->test(Index::class)->call('delete', $pending->id);
+        $this->assertDatabaseHas('room_bookings', ['id' => $pending->id]);
+
+        // pemilik: status selain Pending tidak bisa diedit maupun dihapus
+        Livewire::actingAs($owner)->test(Index::class)->call('edit', $approved->id)->assertSet('editId', null);
+        Livewire::actingAs($owner)->test(Index::class)->call('delete', $approved->id)->call('delete', $rejected->id);
+        $this->assertDatabaseHas('room_bookings', ['id' => $approved->id]);
         $this->assertDatabaseHas('room_bookings', ['id' => $rejected->id]);
 
-        // pemilik: edit pending boleh, edit disetujui tidak
+        // pemilik: Pending boleh diedit dan langsung dihapus
         Livewire::actingAs($owner)->test(Index::class)->call('edit', $pending->id)->assertSet('editId', $pending->id);
-        Livewire::actingAs($owner)->test(Index::class)->call('edit', $approved->id)->assertSet('editId', null);
+        Livewire::actingAs($owner)->test(Index::class)->call('delete', $pending->id);
+        $this->assertDatabaseMissing('room_bookings', ['id' => $pending->id]);
+    }
 
-        // pemilik: hapus ditolak boleh, hapus disetujui/pending tidak
-        Livewire::actingAs($owner)->test(Index::class)->call('delete', $approved->id)->call('delete', $pending->id);
-        $this->assertDatabaseHas('room_bookings', ['id' => $approved->id]);
-        $this->assertDatabaseHas('room_bookings', ['id' => $pending->id]);
-        Livewire::actingAs($owner)->test(Index::class)->call('delete', $rejected->id);
-        $this->assertDatabaseMissing('room_bookings', ['id' => $rejected->id]);
+    public function test_roles_that_see_all_actions_can_edit_and_delete_own_booking_of_any_status(): void
+    {
+        $room = $this->room();
+        foreach (['Kepala Seksi', 'Administrator'] as $i => $jabatan) {
+            $u = $this->makeUser(['jabatan' => $jabatan, 'seksi' => 'Seksi Pelayanan']);
+            $b = $this->booking($room, $u, now()->addDays($i + 1)->setTime(9, 0), now()->addDays($i + 1)->setTime(10, 0), 'disetujui');
+
+            Livewire::actingAs($u)->test(Index::class)->call('edit', $b->id)->assertSet('editId', $b->id);
+            Livewire::actingAs($u)->test(Index::class)->call('delete', $b->id);
+            $this->assertDatabaseMissing('room_bookings', ['id' => $b->id]);
+        }
+    }
+
+    public function test_recent_list_shows_only_five_newest_and_hides_actions_unless_pending_or_privileged(): void
+    {
+        $room = $this->room();
+        $u = $this->pegawai();
+        foreach (range(1, 7) as $i) {
+            $this->booking($room, $u, now()->addDays($i)->setTime(9, 0), now()->addDays($i)->setTime(10, 0), $i === 7 ? 'pending' : 'disetujui');
+        }
+
+        $c = Livewire::actingAs($u)->test(Index::class);
+        $recent = $c->instance()->recent();
+        $this->assertCount(5, $recent);
+        $this->assertSame(7, $recent->first()->id);                        // terbaru dulu
+        $this->assertTrue((bool) $recent->first()->show_actions);          // Pending: aksi tampil
+        $this->assertFalse((bool) $recent->last()->show_actions);          // Disetujui: aksi disembunyikan
+        $c->assertSee('Lihat Semua Riwayat')->assertDontSee('Semua Status');
+
+        $kepala = $this->makeUser(['jabatan' => 'Kepala Seksi', 'seksi' => 'Seksi Pelayanan']);
+        $this->booking($room, $kepala, now()->addDays(20)->setTime(9, 0), now()->addDays(20)->setTime(10, 0), 'disetujui');
+        $this->assertTrue((bool) Livewire::actingAs($kepala)->test(Index::class)->instance()->recent()->first()->show_actions);
+    }
+
+    public function test_riwayat_page_lists_all_with_filter_and_pagination(): void
+    {
+        $room = $this->room();
+        $u = $this->pegawai();
+        foreach (range(1, 12) as $i) {
+            $this->booking($room, $u, now()->addDays($i)->setTime(9, 0), now()->addDays($i)->setTime(10, 0), $i <= 3 ? 'ditolak' : 'pending');
+        }
+
+        $this->actingAs($u)->get('/ruangan/riwayat')->assertOk()->assertSee('Riwayat Peminjaman Ruangan');
+
+        $c = Livewire::actingAs($u)->test(\App\Livewire\Ruangan\Riwayat::class);
+        $this->assertSame(12, $c->instance()->bookings()->total());
+        $this->assertCount(10, $c->instance()->bookings());
+        $c->set('status', 'ditolak');
+        $this->assertSame(3, $c->instance()->bookings()->total());
+    }
+
+    public function test_riwayat_page_is_forbidden_for_kepala_kantor(): void
+    {
+        $this->actingAs($this->makeUser(['jabatan' => 'Kepala Kantor']))->get('/ruangan/riwayat')->assertForbidden();
     }
 
     public function test_reviewer_can_delete_booking_of_any_status(): void
