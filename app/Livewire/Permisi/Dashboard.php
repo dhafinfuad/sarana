@@ -219,8 +219,7 @@ class Dashboard extends Component
 
     /**
      * 5 permohonan terbaru milik pegawai untuk kartu Riwayat (mode Permohonan).
-     * Tombol aksi hanya tampil pada status Pending, kecuali untuk peran yang melihat semua aksi
-     * (Kepala Seksi, Kepala Kantor, Subbag Umum, Administrator).
+     * Tombol aksi hanya tampil pada status Pending, untuk semua peran.
      *
      * @return \Illuminate\Support\Collection<int, Permisi>
      */
@@ -234,12 +233,12 @@ class Dashboard extends Component
             ->latest()->latest('id')
             ->limit(5)
             ->get()
-            ->each(function (Permisi $p) use ($user) {
-                $all = $user->canSeeAllRequestActions();
-                $p->setAttribute('show_actions', $p->status === 'pending' || $all);
-                $p->setAttribute('can_edit', $p->status === 'pending' || $all);
-                $p->setAttribute('can_cancel', $p->status === 'pending');
-                $p->setAttribute('can_delete', $p->status === 'pending' || $all);
+            ->each(function (Permisi $p) {
+                $pending = $p->status === 'pending';
+                $p->setAttribute('show_actions', $pending);
+                $p->setAttribute('can_edit', $pending);
+                $p->setAttribute('can_cancel', $pending);
+                $p->setAttribute('can_delete', $pending);
             });
     }
 
@@ -438,8 +437,9 @@ class Dashboard extends Component
         $user = Auth::user();
 
         // Otorisasi: Boleh edit jika Subbag Umum / Admin, ATAU jika pemilik sendiri & status masih pending
-        $isOwnerPending = ($permisi->user_id === $user->id && ($permisi->status === 'pending' || $user->canSeeAllRequestActions()));
-        $isPrivileged = ($user->isSubbagUmum() || $user->isAdministrator());
+        $isOwnerPending = ($permisi->user_id === $user->id && $permisi->status === 'pending');
+        // Hak mengubah semua status hanya di mode Persetujuan; di mode Permohonan semua peran hanya Pending milik sendiri.
+        $isPrivileged = $this->isReviewerMode && ($user->isSubbagUmum() || $user->isAdministrator());
 
         if (!$isOwnerPending && !$isPrivileged) {
             session()->flash('error', 'Anda tidak memiliki hak untuk mengubah permohonan ini.');
@@ -465,8 +465,9 @@ class Dashboard extends Component
         $user = Auth::user();
 
         // Otorisasi: Boleh update jika Subbag Umum / Admin, ATAU jika pemilik sendiri & status masih pending
-        $isOwnerPending = ($permisi->user_id === $user->id && ($permisi->status === 'pending' || $user->canSeeAllRequestActions()));
-        $isPrivileged = ($user->isSubbagUmum() || $user->isAdministrator());
+        $isOwnerPending = ($permisi->user_id === $user->id && $permisi->status === 'pending');
+        // Hak mengubah semua status hanya di mode Persetujuan; di mode Permohonan semua peran hanya Pending milik sendiri.
+        $isPrivileged = $this->isReviewerMode && ($user->isSubbagUmum() || $user->isAdministrator());
 
         if (!$isOwnerPending && !$isPrivileged) {
             session()->flash('error', 'Anda tidak memiliki hak untuk mengubah permohonan ini.');
@@ -500,8 +501,7 @@ class Dashboard extends Component
             return;
         }
 
-        $me = Auth::user();
-        if ($permisi->user_id === $me->id && ($permisi->status === 'pending' || $me->canSeeAllRequestActions())) {
+        if ($permisi->user_id === Auth::user()->id && $permisi->status === 'pending') {
             $permisi->delete();
             session()->flash('success', 'Data permohonan berhasil dihapus.');
         }

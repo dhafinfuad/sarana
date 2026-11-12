@@ -1,4 +1,4 @@
-<div x-data="{ showDetailModal: false, detail: { title: '', badge: {}, rows: [] } }">
+<div x-data="{ showDetailModal: false, detail: {} }">
 
     @if(!auth()->user()->canAccessAdminDashboard())
         <x-top-header title="Riwayat Permohonan Izin" />
@@ -41,17 +41,20 @@
                         @forelse($this->permisis as $row)
                             @php
                                 $badge = \App\Support\StatusBadge::for($row->status);
-                                $payload = [
-                                    'title' => $row->kategori . ' - ' . $row->jenis,
-                                    'badge' => $badge,
-                                    'rows' => array_values(array_filter([
-                                        ['Keperluan', $row->keperluan],
-                                        ['Waktu Mulai', $row->tanggal_mulai->translatedFormat('d M Y H:i')],
-                                        ['Waktu Selesai', $row->tanggal_selesai->translatedFormat('d M Y H:i')],
-                                        ['Diajukan', $row->created_at->translatedFormat('d M Y H:i')],
-                                        $row->processor ? ['Diproses Oleh', $row->processor->name] : null,
-                                    ])),
-                                ];
+                                $payload = \App\Support\RiwayatDetail::make(
+                                title: 'Detail Permohonan',
+                                code: 'REQ-' . $row->created_at->format('Y') . '-' . str_pad((string) $row->id, 4, '0', STR_PAD_LEFT),
+                                status: $row->status,
+                                mulai: $row->tanggal_mulai->translatedFormat('d M Y H:i'),
+                                selesai: $row->tanggal_selesai->translatedFormat('d M Y H:i'),
+                                pairs: array_values(array_filter([
+                                    [['Kategori', $row->kategori, 'bold'], ['Jenis', $row->jenis, 'chip']],
+                                    $row->processor ? [['Diproses Oleh', $row->processor->name, 'bold'], ['Waktu Diproses', $row->processed_at ? $row->processed_at->translatedFormat('d M Y H:i') : '-', 'normal']] : null,
+                                ])),
+                                noteLabel: 'Keperluan',
+                                noteHeading: null,
+                                noteText: $row->keperluan,
+                            );
                             @endphp
                             <tr class="hover:bg-slate-50/60 transition-colors" wire:key="riwayat-{{ $row->id }}">
                                 <td class="py-4 px-6"><p class="font-bold text-slate-900">{{ $row->kategori }}</p><p class="text-[10px] text-slate-400 mt-0.5">{{ $row->jenis }}</p></td>

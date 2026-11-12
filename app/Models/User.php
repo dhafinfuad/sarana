@@ -132,15 +132,6 @@ class User extends Authenticatable
         return ! empty($this->getManagedSeksiList());
     }
 
-    /**
-     * Peran yang melihat (dan boleh memakai) seluruh tombol aksi pada riwayat pengajuan sendiri,
-     * apa pun statusnya: Kepala Seksi, Kepala Kantor (termasuk PLH/PLT), Subbag Umum, Administrator.
-     */
-    public function canSeeAllRequestActions(): bool
-    {
-        return $this->isKepalaSeksi() || $this->isKepalaKantor() || $this->isSubbagUmum() || $this->isAdministrator();
-    }
-
     /** Apakah user ini adalah Supervisor? */
     public function isSupervisor(): bool
     {

@@ -2,7 +2,7 @@
     showModal: false,
     showEditModal: false,
     showDetailModal: false,
-    detail: { title: '', badge: {}, rows: [] },
+    detail: {},
     showConfirmModal: false,
     confirmAction: '',
     confirmId: null,
@@ -314,17 +314,17 @@
                     @forelse($this->recent as $row)
                         @php
                             $badge = \App\Support\StatusBadge::for($row->status);
-                            $payload = [
-                                'title' => $row->room->nama,
-                                'badge' => $badge,
-                                'rows' => [
-                                    ['Keperluan', $row->keperluan],
-                                    ['Jumlah Peserta', $row->jumlah_peserta . ' orang'],
-                                    ['Waktu Mulai', $row->tanggal_mulai->translatedFormat('d M Y H:i')],
-                                    ['Waktu Selesai', $row->tanggal_selesai->translatedFormat('d M Y H:i')],
-                                    ['Diajukan', $row->created_at->translatedFormat('d M Y H:i')],
-                                ],
-                            ];
+                            $payload = \App\Support\RiwayatDetail::make(
+                                title: 'Detail Peminjaman',
+                                code: 'REQ-' . $row->created_at->format('Y') . '-' . str_pad((string) $row->id, 4, '0', STR_PAD_LEFT),
+                                status: $row->status,
+                                mulai: $row->tanggal_mulai->translatedFormat('d M Y H:i'),
+                                selesai: $row->tanggal_selesai->translatedFormat('d M Y H:i'),
+                                pairs: [[['Ruangan', $row->room->nama, 'bold'], ['Jumlah Peserta', $row->jumlah_peserta . ' orang', 'chip']]],
+                                noteLabel: 'Keperluan',
+                                noteHeading: $row->room->lokasi,
+                                noteText: $row->keperluan,
+                            );
                         @endphp
                         <div class="p-5 flex flex-wrap items-center justify-between gap-3 hover:bg-slate-50/70 transition" wire:key="recent-{{ $row->id }}">
                             <div class="flex items-center gap-3.5 min-w-0">

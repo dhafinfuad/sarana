@@ -166,8 +166,7 @@ class Index extends Component
 
     /**
      * Flag hak aksi per baris (atribut sementara, tidak disimpan ke database).
-     * Tombol aksi hanya ditampilkan pada status Pending, kecuali untuk peran yang
-     * melihat semua aksi (Kepala Seksi, Kepala Kantor, Subbag Umum, Administrator).
+     * Pada mode Peminjaman tombol aksi hanya ditampilkan pada status Pending (semua peran).
      *
      * @param \Illuminate\Support\Collection<int, RoomBooking> $rows
      */
@@ -181,7 +180,7 @@ class Index extends Component
             $b->setAttribute('can_edit', $this->userCanEdit($b));
             $b->setAttribute('can_delete', $this->userCanDelete($b));
             $b->setAttribute('can_cancel', ! $this->isReviewerMode && $b->user_id === $user->id && $b->status === 'pending');
-            $b->setAttribute('show_actions', $b->status === 'pending' || $user->canSeeAllRequestActions());
+            $b->setAttribute('show_actions', $b->status === 'pending');
         });
     }
 
@@ -303,27 +302,29 @@ class Index extends Component
     // -----------------------------------------------------------------------
 
     /**
-     * Pengelola boleh mengubah semua status. Pemohon hanya miliknya sendiri: status Pending,
-     * atau semua status bila berperan Kepala Seksi / Kepala Kantor / Subbag Umum / Administrator.
+     * Mode Persetujuan: pengelola (Administrator / Subbag Umum) boleh mengubah semua status.
+     * Mode Peminjaman: siapa pun (semua peran) hanya boleh mengubah miliknya yang masih Pending.
      */
     private function userCanEdit(RoomBooking $b): bool
     {
         $u = Auth::user();
 
-        return $u->canManageBookings()
-            || ($b->user_id === $u->id && ($b->status === 'pending' || $u->canSeeAllRequestActions()));
+        return $this->isReviewerMode
+            ? $u->canManageBookings()
+            : ($b->user_id === $u->id && $b->status === 'pending');
     }
 
     /**
-     * Pengelola boleh menghapus semua status. Pemohon hanya miliknya sendiri: status Pending,
-     * atau semua status bila berperan Kepala Seksi / Kepala Kantor / Subbag Umum / Administrator.
+     * Mode Persetujuan: pengelola boleh menghapus semua status.
+     * Mode Peminjaman: siapa pun (semua peran) hanya boleh menghapus miliknya yang masih Pending.
      */
     private function userCanDelete(RoomBooking $b): bool
     {
         $u = Auth::user();
 
-        return $u->canManageBookings()
-            || ($b->user_id === $u->id && ($b->status === 'pending' || $u->canSeeAllRequestActions()));
+        return $this->isReviewerMode
+            ? $u->canManageBookings()
+            : ($b->user_id === $u->id && $b->status === 'pending');
     }
 
     public function edit(int $id): void
