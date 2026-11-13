@@ -57,7 +57,7 @@ class Kelola extends Component
                     ->orWhere('lokasi', 'like', $term)
                     ->orWhere('fasilitas', 'like', $term));
             })
-            ->orderBy('nama')
+            ->berurutan()
             ->paginate(10);
     }
 
@@ -94,6 +94,7 @@ class Kelola extends Component
             'lokasi'    => $data['lokasi'] ?: null,
             'kapasitas' => (int) $data['kapasitas'],
             'fasilitas' => $data['fasilitas'] ?: null,
+            'urutan'    => (int) Room::max('urutan') + 1,
         ]);
 
         $this->resetForm();
@@ -145,6 +146,24 @@ class Kelola extends Component
         session()->flash('success', $room->status === 'tersedia'
             ? 'Ruangan diaktifkan kembali.'
             : 'Ruangan dinonaktifkan. Pengajuan yang sudah ada tidak berubah.');
+    }
+
+    /** Geser ruangan satu posisi ke atas (-1) atau ke bawah (+1) pada daftar berurutan. */
+    public function geser(int $id, int $arah): void
+    {
+        $this->authorizeManager();
+
+        $ids = Room::berurutan()->pluck('id')->all();
+        $i = array_search($id, $ids, true);
+        $j = $i === false ? false : $i + ($arah < 0 ? -1 : 1);
+        if ($i === false || $j < 0 || $j >= count($ids)) {
+            return;
+        }
+
+        [$ids[$i], $ids[$j]] = [$ids[$j], $ids[$i]];
+        foreach ($ids as $n => $roomId) {
+            Room::whereKey($roomId)->update(['urutan' => $n + 1]);
+        }
     }
 
     public function hapus(int $id): void
