@@ -41,13 +41,19 @@ class Index extends Component
 
     public string $roomId = '';
     public string $keperluan = '';
-    public string $jumlahPeserta = '1';
+    public string $jumlahPeserta = '';
+
+    // Pemilih jadwal (modal pengajuan): tanggal + waktu dalam menit sejak 00.00
+    public string $tanggal = '';
+    public ?int $mulaiMenit = null;
+    public ?int $selesaiMenit = null;
     public string $tanggalMulai = '';
     public string $tanggalSelesai = '';
 
     public function mount(string $mode = 'pemohon'): void
     {
         $this->isReviewerMode = $mode === 'reviewer';
+        $this->tanggal = now()->toDateString();
         $user = Auth::user();
 
         if ($this->isReviewerMode && ! $user->hasAccess('ruangan.persetujuan')) {
@@ -247,6 +253,59 @@ class Index extends Component
     // Pegawai
     // -----------------------------------------------------------------------
 
+    /**
+     * Data jadwal satu tanggal untuk pemilih jadwal: ruangan yang tersedia, pemakaian
+     * (Terpakai = disetujui, Ditahan = menunggu persetujuan), dan batas waktu yang sudah lewat.
+     *
+     * @return array<string, mixed>
+     */
+    public function jadwal(string $tanggal): array
+    {
+        abort_unless(Auth::user()->hasAccess('ruangan.peminjaman'), 403);
+
+        $today = now()->startOfDay();
+        try {
+            $day = Carbon::createFromFormat('Y-m-d', $tanggal)->startOfDay();
+        } catch (\Throwable) {
+            $day = $today->copy();
+        }
+        if ($day->lt($today)) {
+            $day = $today->copy();
+        }
+
+        $langkah = (int) config('ruangan.langkah');
+        $bookings = RoomBooking::whereIn('status', ['pending', 'disetujui'])
+            ->where('tanggal_mulai', '<', $day->copy()->addDay())
+            ->where('tanggal_selesai', '>', $day)
+            ->get(['room_id', 'tanggal_mulai', 'tanggal_selesai', 'status'])
+            ->groupBy('room_id');
+
+        $rooms = Room::tersedia()->orderBy('nama')->get()->map(function (Room $r) use ($bookings, $day) {
+            return [
+                'id'        => $r->id,
+                'nama'      => $r->nama,
+                'lokasi'    => $r->lokasi,
+                'kapasitas' => $r->kapasitas,
+                'fasilitas' => $r->fasilitas,
+                'busy'      => ($bookings[$r->id] ?? collect())->map(fn (RoomBooking $b) => [
+                    's'  => max(0, (int) $day->diffInMinutes($b->tanggal_mulai, false)),
+                    'e'  => min(1440, (int) $day->diffInMinutes($b->tanggal_selesai, false)),
+                    'st' => $b->status === 'disetujui' ? 'ok' : 'hold',
+                ])->sortBy('s')->values()->all(),
+            ];
+        })->values()->all();
+
+        return [
+            'tanggal' => $day->toDateString(),
+            'hariIni' => $day->equalTo($today),
+            'now'     => $day->equalTo($today) ? intdiv(now()->hour * 60 + now()->minute, $langkah) * $langkah : null,
+            'buka'    => (int) config('ruangan.jam_buka') * 60,
+            'tutup'   => (int) config('ruangan.jam_tutup') * 60,
+            'langkah' => $langkah,
+            'rooms'   => $rooms,
+        ];
+    }
+
     public function submit(): void
     {
         // Pengajuan atas nama sendiri, dari halaman Peminjaman maupun Persetujuan.
@@ -254,16 +313,51 @@ class Index extends Component
             abort(403, 'Anda tidak memiliki hak untuk mengajukan peminjaman ruangan.');
         }
 
+        $buka    = (int) config('ruangan.jam_buka') * 60;
+        $tutup   = (int) config('ruangan.jam_tutup') * 60;
+        $langkah = (int) config('ruangan.langkah');
+
         $data = $this->validate([
-            'roomId'         => ['required', 'exists:rooms,id'],
-            'keperluan'      => ['required', 'string', 'min:5', 'max:255'],
-            'jumlahPeserta'  => ['required', 'integer', 'min:1'],
-            'tanggalMulai'   => ['required', 'date', 'after_or_equal:now'],
-            'tanggalSelesai' => ['required', 'date', 'after:tanggalMulai'],
+            'roomId'        => ['required', 'exists:rooms,id'],
+            'keperluan'     => ['required', 'string', 'min:5', 'max:255'],
+            'jumlahPeserta' => ['required', 'integer', 'min:1'],
+            'tanggal'       => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'mulaiMenit'    => ['required', 'integer'],
+            'selesaiMenit'  => ['required', 'integer'],
         ], [
-            'tanggalMulai.after_or_equal' => 'Waktu mulai tidak boleh di masa lalu.',
-            'tanggalSelesai.after'        => 'Waktu selesai harus setelah waktu mulai.',
+            'roomId.required'       => 'Pilih ruangan dengan mengetuk jadwalnya.',
+            'jumlahPeserta.required' => 'Isi jumlah orang.',
+            'jumlahPeserta.integer' => 'Jumlah orang harus berupa angka.',
+            'jumlahPeserta.min'     => 'Jumlah orang minimal 1.',
+            'tanggal.after_or_equal' => 'Tanggal tidak boleh di masa lalu.',
+            'mulaiMenit.required'   => 'Pilih waktu mulai.',
+            'selesaiMenit.required' => 'Pilih waktu selesai.',
+            'keperluan.required'    => 'Keperluan wajib diisi.',
+            'keperluan.min'         => 'Keperluan minimal 5 karakter.',
         ]);
+
+        $mulaiM = (int) $data['mulaiMenit'];
+        $akhirM = (int) $data['selesaiMenit'];
+
+        if ($mulaiM % $langkah !== 0 || $akhirM % $langkah !== 0) {
+            throw ValidationException::withMessages(['mulaiMenit' => "Waktu harus kelipatan {$langkah} menit."]);
+        }
+        if ($mulaiM < $buka || $akhirM > $tutup) {
+            throw ValidationException::withMessages(['mulaiMenit' => 'Peminjaman hanya pada jam operasional ' . sprintf('%02d.00', $buka / 60) . ' sampai ' . sprintf('%02d.00', $tutup / 60) . '.']);
+        }
+        if ($akhirM - $mulaiM < $langkah) {
+            throw ValidationException::withMessages(['selesaiMenit' => "Durasi minimal {$langkah} menit."]);
+        }
+
+        $day     = Carbon::createFromFormat('Y-m-d', $data['tanggal'])->startOfDay();
+        $mulaiAt = $day->copy()->addMinutes($mulaiM);
+        $akhirAt = $day->copy()->addMinutes($akhirM);
+
+        // Boleh memulai di kuartal yang sedang berjalan, tetapi tidak sebelumnya.
+        $kuartal = now()->startOfHour()->addMinutes(intdiv(now()->minute, $langkah) * $langkah);
+        if ($mulaiAt->lt($kuartal)) {
+            throw ValidationException::withMessages(['mulaiMenit' => 'Waktu mulai tidak boleh di masa lalu.']);
+        }
 
         $room = Room::tersedia()->find($data['roomId']);
         if (! $room) {
@@ -271,15 +365,15 @@ class Index extends Component
         }
         if ((int) $data['jumlahPeserta'] > $room->kapasitas) {
             throw ValidationException::withMessages([
-                'jumlahPeserta' => "Jumlah peserta melebihi kapasitas ruangan ({$room->kapasitas} orang).",
+                'jumlahPeserta' => "Jumlah orang melebihi kapasitas ruangan ({$room->kapasitas} orang).",
             ]);
         }
-        $mulai   = Carbon::parse($data['tanggalMulai'])->toDateTimeString();
-        $selesai = Carbon::parse($data['tanggalSelesai'])->toDateTimeString();
 
+        $mulai   = $mulaiAt->toDateTimeString();
+        $selesai = $akhirAt->toDateTimeString();
         if (RoomBooking::overlapping($room->id, $mulai, $selesai)->exists()) {
             throw ValidationException::withMessages([
-                'tanggalMulai' => 'Ruangan sudah dipesan pada rentang waktu tersebut.',
+                'mulaiMenit' => 'Ruangan sudah dipesan pada rentang waktu tersebut. Pilih waktu lain.',
             ]);
         }
 
@@ -293,8 +387,7 @@ class Index extends Component
             'status'          => 'pending',
         ]);
 
-        $this->reset(['roomId', 'keperluan', 'tanggalMulai', 'tanggalSelesai']);
-        $this->jumlahPeserta = '1';
+        $this->resetForm();
         $this->dispatch('close-room-modal');
         session()->flash('success', 'Peminjaman ruangan berhasil diajukan.');
     }
@@ -480,8 +573,8 @@ class Index extends Component
 
     public function resetForm(): void
     {
-        $this->reset(['editId', 'roomId', 'keperluan', 'tanggalMulai', 'tanggalSelesai']);
-        $this->jumlahPeserta = '1';
+        $this->reset(['editId', 'roomId', 'keperluan', 'jumlahPeserta', 'tanggalMulai', 'tanggalSelesai', 'mulaiMenit', 'selesaiMenit']);
+        $this->tanggal = now()->toDateString();
         $this->resetValidation();
     }
 
