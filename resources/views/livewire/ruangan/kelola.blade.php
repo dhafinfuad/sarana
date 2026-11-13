@@ -36,7 +36,7 @@
         <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">Kelola Ruangan</h1>
-                <p class="text-slate-500 text-sm mt-1.5">Tambah, ubah, dan aktifkan atau nonaktifkan ruangan yang dapat dipinjam pegawai.</p>
+                <p class="text-slate-500 text-sm mt-1.5">Tambah, ubah, urutkan, dan aktifkan atau nonaktifkan ruangan yang dapat dipinjam pegawai.</p>
             </div>
             <div class="flex items-center gap-2.5 self-start sm:self-auto">
                 <button type="button" @click="$wire.resetForm(); showAddModal = true"
@@ -114,6 +114,17 @@
                                 </td>
                                 <td class="py-3 px-1.5 text-center whitespace-nowrap">
                                     <div class="inline-flex items-center justify-center gap-0.5">
+                                        @php $urut = $search === '' ? ($this->rooms->firstItem() + $loop->index) : null; @endphp
+                                        <button type="button" wire:click="geser({{ $room->id }}, -1)" @disabled($urut === null || $urut === 1)
+                                            class="p-1 text-slate-500 hover:bg-slate-100 rounded-lg transition cursor-pointer shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+                                            title="{{ $urut === null ? 'Kosongkan pencarian untuk mengatur urutan' : 'Naikkan urutan' }}">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                                        </button>
+                                        <button type="button" wire:click="geser({{ $room->id }}, 1)" @disabled($urut === null || $urut === $this->rooms->total())
+                                            class="p-1 text-slate-500 hover:bg-slate-100 rounded-lg transition cursor-pointer shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+                                            title="{{ $urut === null ? 'Kosongkan pencarian untuk mengatur urutan' : 'Turunkan urutan' }}">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                                        </button>
                                         <button type="button" wire:click="edit({{ $room->id }})"
                                             class="p-1 text-amber-600 hover:bg-amber-50 rounded-lg border border-transparent hover:border-amber-200 transition cursor-pointer shrink-0"
                                             title="Edit Ruangan">

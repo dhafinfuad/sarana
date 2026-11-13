@@ -10,12 +10,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
-    protected $fillable = ['nama', 'lokasi', 'kapasitas', 'fasilitas', 'status'];
+    protected $fillable = ['nama', 'lokasi', 'kapasitas', 'fasilitas', 'status', 'urutan'];
 
     /** @param Builder<Room> $query */
     public function scopeTersedia(Builder $query): Builder
     {
         return $query->where('status', 'tersedia');
+    }
+
+    /** @param Builder<Room> $query */
+    public function scopeBerurutan(Builder $query): Builder
+    {
+        return $query->orderBy('urutan')->orderBy('nama')->orderBy('id');
     }
 
     /** @return HasMany<RoomBooking, $this> */

@@ -189,6 +189,26 @@ class RuanganTest extends TestCase
 
     }
 
+    public function test_admin_can_reorder_rooms_and_picker_follows_order(): void
+    {
+        $admin = $this->admin();
+        $a = $this->room(['nama' => 'A', 'urutan' => 1]);
+        $b = $this->room(['nama' => 'B', 'urutan' => 2]);
+        $c = $this->room(['nama' => 'C', 'urutan' => 3]);
+
+        Livewire::actingAs($admin)->test(Kelola::class)->call('geser', $c->id, -1)->call('geser', $a->id, -1);
+        $this->assertSame(['A', 'C', 'B'], Room::berurutan()->pluck('nama')->all());
+
+        Livewire::actingAs($admin)->test(Kelola::class)->call('geser', $b->id, 1);
+        $this->assertSame(['A', 'C', 'B'], Room::berurutan()->pluck('nama')->all());
+
+        $rooms = Livewire::actingAs($this->pegawai())->test(Index::class)->instance()->jadwal(now()->addDay()->toDateString())['rooms'];
+        $this->assertSame(['A', 'C', 'B'], array_column($rooms, 'nama'));
+
+        Livewire::actingAs($admin)->test(Kelola::class)->set('nama', 'D')->set('kapasitas', '5')->call('save');
+        $this->assertSame('D', Room::berurutan()->pluck('nama')->last());
+    }
+
     public function test_admin_can_add_edit_and_toggle_room(): void
     {
         $admin = $this->admin();

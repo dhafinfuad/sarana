@@ -99,7 +99,7 @@ class Index extends Component
     #[Computed]
     public function rooms()
     {
-        return Room::tersedia()->orderBy('nama')->get();
+        return Room::tersedia()->berurutan()->get();
     }
 
     /**
@@ -272,7 +272,7 @@ class Index extends Component
             ->get(['room_id', 'tanggal_mulai', 'tanggal_selesai', 'status'])
             ->groupBy('room_id');
 
-        $rooms = Room::tersedia()->orderBy('nama')->get()->map(function (Room $r) use ($bookings, $day) {
+        $rooms = Room::tersedia()->berurutan()->get()->map(function (Room $r) use ($bookings, $day) {
             return [
                 'id'        => $r->id,
                 'nama'      => $r->nama,
