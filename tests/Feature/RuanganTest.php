@@ -77,6 +77,13 @@ class RuanganTest extends TestCase
         ]);
     }
 
+    /** Isi pemilih jadwal (modal pengajuan): ruangan, waktu dalam menit sejak 00.00, jumlah orang, keperluan. */
+    private function isi($component, Room $room, int $mulai, int $selesai, ?string $tanggal = null, string $jumlah = '5', string $keperluan = 'Rapat koordinasi')
+    {
+        return $component->set('roomId', (string) $room->id)->set('keperluan', $keperluan)->set('jumlahPeserta', $jumlah)
+            ->set('tanggal', $tanggal ?? now()->addDay()->toDateString())->set('mulaiMenit', $mulai)->set('selesaiMenit', $selesai);
+    }
+
     public function test_guest_is_redirected_to_login(): void
     {
         $this->get('/ruangan/peminjaman')->assertRedirect('/login');
@@ -92,16 +99,14 @@ class RuanganTest extends TestCase
         $room = $this->room();
         $user = $this->pegawai();
 
-        Livewire::actingAs($user)->test(Index::class)
-            ->set('roomId', (string) $room->id)
-            ->set('keperluan', 'Rapat koordinasi')
-            ->set('jumlahPeserta', '5')
-            ->set('tanggalMulai', now()->addDay()->setTime(9, 0)->format('Y-m-d\TH:i'))
-            ->set('tanggalSelesai', now()->addDay()->setTime(11, 0)->format('Y-m-d\TH:i'))
-            ->call('submit')
-            ->assertHasNoErrors();
+        $this->isi(Livewire::actingAs($user)->test(Index::class), $room, 9 * 60, 11 * 60 + 15)
+            ->call('submit')->assertHasNoErrors();
 
-        $this->assertDatabaseHas('room_bookings', ['room_id' => $room->id, 'user_id' => $user->id, 'status' => 'pending']);
+        $b = RoomBooking::where('user_id', $user->id)->firstOrFail();
+        $this->assertSame($room->id, $b->room_id);
+        $this->assertSame('pending', $b->status);
+        $this->assertSame('09:00', $b->tanggal_mulai->format('H:i'));
+        $this->assertSame('11:15', $b->tanggal_selesai->format('H:i'));
     }
 
     public function test_overlapping_booking_is_rejected(): void
@@ -109,30 +114,22 @@ class RuanganTest extends TestCase
         $room = $this->room();
         $this->booking($room, $this->pegawai(), now()->addDay()->setTime(9, 0), now()->addDay()->setTime(11, 0));
 
-        Livewire::actingAs($this->pegawai())->test(Index::class)
-            ->set('roomId', (string) $room->id)
-            ->set('keperluan', 'Rapat lain')
-            ->set('jumlahPeserta', '3')
-            ->set('tanggalMulai', now()->addDay()->setTime(10, 0)->format('Y-m-d\TH:i'))
-            ->set('tanggalSelesai', now()->addDay()->setTime(12, 0)->format('Y-m-d\TH:i'))
-            ->call('submit')
-            ->assertHasErrors(['tanggalMulai']);
-
+        $this->isi(Livewire::actingAs($this->pegawai())->test(Index::class), $room, 10 * 60 + 45, 12 * 60, null, '3', 'Rapat lain')
+            ->call('submit')->assertHasErrors(['mulaiMenit']);
         $this->assertDatabaseCount('room_bookings', 1);
+
+        // berurutan tepat setelahnya (11.00) tidak bentrok
+        $this->isi(Livewire::actingAs($this->pegawai())->test(Index::class), $room, 11 * 60, 12 * 60, null, '3', 'Rapat lanjutan')
+            ->call('submit')->assertHasNoErrors();
+        $this->assertDatabaseCount('room_bookings', 2);
     }
 
     public function test_participants_over_capacity_is_rejected(): void
     {
         $room = $this->room(['kapasitas' => 4]);
 
-        Livewire::actingAs($this->pegawai())->test(Index::class)
-            ->set('roomId', (string) $room->id)
-            ->set('keperluan', 'Rapat besar')
-            ->set('jumlahPeserta', '9')
-            ->set('tanggalMulai', now()->addDay()->format('Y-m-d\TH:i'))
-            ->set('tanggalSelesai', now()->addDay()->addHour()->format('Y-m-d\TH:i'))
-            ->call('submit')
-            ->assertHasErrors(['jumlahPeserta']);
+        $this->isi(Livewire::actingAs($this->pegawai())->test(Index::class), $room, 9 * 60, 10 * 60, null, '9', 'Rapat besar')
+            ->call('submit')->assertHasErrors(['jumlahPeserta']);
     }
 
     public function test_admin_can_approve_and_conflicting_approval_is_blocked(): void
@@ -220,10 +217,7 @@ class RuanganTest extends TestCase
     {
         $room = $this->room(['status' => 'tidak_tersedia']);
 
-        Livewire::actingAs($this->pegawai())->test(Index::class)
-            ->set('roomId', (string) $room->id)->set('keperluan', 'Rapat koordinasi')->set('jumlahPeserta', '2')
-            ->set('tanggalMulai', now()->addDay()->format('Y-m-d\TH:i'))
-            ->set('tanggalSelesai', now()->addDay()->addHour()->format('Y-m-d\TH:i'))
+        $this->isi(Livewire::actingAs($this->pegawai())->test(Index::class), $room, 9 * 60, 10 * 60, null, '2')
             ->call('submit')->assertHasErrors(['roomId']);
     }
     // ---- Edit, Hapus, dan aksi di semua status ----
@@ -467,7 +461,7 @@ class RuanganTest extends TestCase
         $this->actingAs($this->admin())->get('/ruangan/persetujuan')->assertOk()
             ->assertSee('showModal = true', false)
             ->assertSee('showExportModal = true', false)
-            ->assertSee('Form Pengajuan Peminjaman Ruangan')
+            ->assertSee('Pengajuan Peminjaman Ruangan')->assertSee('Jumlah orang', false)->assertSee('bookingPicker', false)
             ->assertSee('Export Laporan Peminjaman Ruangan')
             ->assertSee('Unduh Laporan');
     }
@@ -477,10 +471,7 @@ class RuanganTest extends TestCase
         $room = $this->room();
         $admin = $this->admin();
 
-        Livewire::actingAs($admin)->test(Index::class, ['mode' => 'reviewer'])
-            ->set('roomId', (string) $room->id)->set('keperluan', 'Rapat pimpinan')->set('jumlahPeserta', '4')
-            ->set('tanggalMulai', now()->addDay()->setTime(9, 0)->format('Y-m-d\TH:i'))
-            ->set('tanggalSelesai', now()->addDay()->setTime(10, 0)->format('Y-m-d\TH:i'))
+        $this->isi(Livewire::actingAs($admin)->test(Index::class, ['mode' => 'reviewer']), $room, 9 * 60, 10 * 60, null, '4', 'Rapat pimpinan')
             ->call('submit')->assertHasNoErrors();
 
         $this->assertDatabaseHas('room_bookings', ['user_id' => $admin->id, 'keperluan' => 'Rapat pimpinan', 'status' => 'pending']);
@@ -545,5 +536,87 @@ class RuanganTest extends TestCase
             $this->actingAs($u)->get('/ruangan/peminjaman')->assertOk()
                 ->assertDontSee($persetujuan, false)->assertDontSee($kelola, false);
         }
+    }
+    // ---- Pemilih jadwal: aturan 15 menit, jam operasional, jadwal() ----
+
+    public function test_time_must_follow_15_minute_step_operating_hours_and_minimum_duration(): void
+    {
+        $room = $this->room();
+        $c = fn () => Livewire::actingAs($this->pegawai())->test(Index::class);
+
+        $this->isi($c(), $room, 9 * 60 + 10, 10 * 60)->call('submit')->assertHasErrors(['mulaiMenit']);          // bukan kelipatan 15
+        $this->isi($c(), $room, 6 * 60 + 45, 8 * 60)->call('submit')->assertHasErrors(['mulaiMenit']);          // sebelum 07.00
+        $this->isi($c(), $room, 16 * 60, 17 * 60 + 15)->call('submit')->assertHasErrors(['mulaiMenit']);        // lewat 17.00
+        $this->isi($c(), $room, 9 * 60, 9 * 60)->call('submit')->assertHasErrors(['selesaiMenit']);             // durasi 0
+        $this->isi($c(), $room, 10 * 60, 9 * 60)->call('submit')->assertHasErrors(['selesaiMenit']);            // akhir sebelum awal
+        $this->assertDatabaseCount('room_bookings', 0);
+
+        $this->isi($c(), $room, 7 * 60, 7 * 60 + 15)->call('submit')->assertHasNoErrors();                      // batas bawah, durasi minimum
+        $this->isi($c(), $room, 16 * 60 + 45, 17 * 60)->call('submit')->assertHasNoErrors();                    // batas atas
+        $this->assertDatabaseCount('room_bookings', 2);
+    }
+
+    public function test_cannot_book_the_past_but_can_start_in_the_current_quarter(): void
+    {
+        \Illuminate\Support\Carbon::setTestNow(now()->setTime(10, 20));
+        $room = $this->room();
+        $today = now()->toDateString();
+
+        $this->isi(Livewire::actingAs($this->pegawai())->test(Index::class), $room, 9 * 60, 10 * 60, $today)
+            ->call('submit')->assertHasErrors(['mulaiMenit']);
+        $this->isi(Livewire::actingAs($this->pegawai())->test(Index::class), $room, 10 * 60, 11 * 60, $today)
+            ->call('submit')->assertHasErrors(['mulaiMenit']);                                                    // 10.00 sudah lewat
+        $this->isi(Livewire::actingAs($this->pegawai())->test(Index::class), $room, 10 * 60 + 15, 11 * 60, $today)
+            ->call('submit')->assertHasNoErrors();                                                                // kuartal berjalan
+        $this->isi(Livewire::actingAs($this->pegawai())->test(Index::class), $room, 9 * 60, 10 * 60, now()->subDay()->toDateString())
+            ->call('submit')->assertHasErrors(['tanggal']);
+
+        \Illuminate\Support\Carbon::setTestNow();
+    }
+
+    public function test_jadwal_returns_available_rooms_busy_intervals_and_now(): void
+    {
+        $aktif = $this->room(['nama' => 'Ruang Aktif', 'kapasitas' => 8]);
+        $this->room(['nama' => 'Ruang Mati', 'status' => 'tidak_tersedia']);
+        $u = $this->pegawai();
+        $day = now()->addDay();
+        $this->booking($aktif, $u, $day->copy()->setTime(9, 0), $day->copy()->setTime(10, 15), 'disetujui');
+        $this->booking($aktif, $u, $day->copy()->setTime(13, 30), $day->copy()->setTime(14, 0), 'pending');
+        $this->booking($aktif, $u, $day->copy()->setTime(15, 0), $day->copy()->setTime(16, 0), 'ditolak');   // tidak mengunci
+        $this->booking($aktif, $u, $day->copy()->addDay()->setTime(9, 0), $day->copy()->addDay()->setTime(10, 0));   // hari lain
+
+        $c = Livewire::actingAs($u)->test(Index::class)->instance();
+        $d = $c->jadwal($day->toDateString());
+
+        $this->assertSame(['Ruang Aktif'], array_column($d['rooms'], 'nama'));
+        $this->assertSame([['s' => 540, 'e' => 615, 'st' => 'ok'], ['s' => 810, 'e' => 840, 'st' => 'hold']], $d['rooms'][0]['busy']);
+        $this->assertSame([420, 1020, 15, false, null], [$d['buka'], $d['tutup'], $d['langkah'], $d['hariIni'], $d['now']]);
+
+        \Illuminate\Support\Carbon::setTestNow(now()->setTime(10, 20));
+        $hari = $c->jadwal(now()->toDateString());
+        $this->assertTrue($hari['hariIni']);
+        $this->assertSame(615, $hari['now']);                                                                      // 10.15
+        $this->assertSame(now()->toDateString(), $c->jadwal(now()->subDays(3)->toDateString())['tanggal']);       // tanggal lampau dipaksa ke hari ini
+        \Illuminate\Support\Carbon::setTestNow();
+    }
+
+    public function test_jadwal_is_forbidden_without_peminjaman_access(): void
+    {
+        $kk = $this->makeUser(['jabatan' => 'Kepala Kantor']);
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->actingAs($kk);
+        (new Index())->jadwal(now()->toDateString());
+    }
+
+    public function test_booking_that_spans_midnight_is_clamped_in_jadwal(): void
+    {
+        $room = $this->room();
+        $u = $this->pegawai();
+        $this->booking($room, $u, now()->addDay()->setTime(22, 0), now()->addDays(2)->setTime(8, 0), 'disetujui');
+
+        $c = Livewire::actingAs($u)->test(Index::class)->instance();
+        $this->assertSame([['s' => 1320, 'e' => 1440, 'st' => 'ok']], $c->jadwal(now()->addDay()->toDateString())['rooms'][0]['busy']);
+        $this->assertSame([['s' => 0, 'e' => 480, 'st' => 'ok']], $c->jadwal(now()->addDays(2)->toDateString())['rooms'][0]['busy']);
     }
 }

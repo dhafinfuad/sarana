@@ -343,32 +343,9 @@
         @endif
     </div>
 
-    <!-- Modal Form Pengajuan -->
+    <!-- Modal Pengajuan (pemilih jadwal) -->
     @if(auth()->user()->hasAccess('ruangan.peminjaman'))
-    <x-modal show="showModal" maxWidth="max-w-lg">
-        <x-slot:header>
-            <div class="flex items-center justify-between w-full">
-                <h3 class="text-base font-bold text-slate-900">Form Pengajuan Peminjaman Ruangan</h3>
-                <button @click="showModal = false" type="button" class="text-slate-400 hover:text-slate-700 text-xl leading-none cursor-pointer">&times;</button>
-            </div>
-        </x-slot:header>
-
-        <form wire:submit.prevent="submit" class="space-y-4 text-xs">
-            @include('livewire.ruangan.partials.booking-fields', ['roomOptions' => $this->rooms])
-
-            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
-                <button @click="showModal = false" type="button"
-                    class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition text-xs cursor-pointer">
-                    Batal
-                </button>
-                <button type="submit"
-                    class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs shadow-md shadow-brand-600/25 transition cursor-pointer flex items-center gap-1.5">
-                    <span>Ajukan Peminjaman</span>
-                    <span wire:loading wire:target="submit" class="material-symbols-outlined animate-spin text-[14px]">refresh</span>
-                </button>
-            </div>
-        </form>
-    </x-modal>
+        @include('livewire.ruangan.partials.picker-modal')
     @endif
 
     <!-- Modal Edit Peminjaman -->

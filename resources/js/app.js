@@ -8,3 +8,6 @@
  *
  * Gunakan file ini hanya untuk custom JS non-Alpine/non-Livewire.
  */
+
+// Pemilih jadwal peminjaman ruangan (komponen Alpine kustom; tidak mengimpor Alpine)
+import './booking-picker.js';
