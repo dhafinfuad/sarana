@@ -19,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Terapkan ulang middleware hak akses (access:kunci) pada setiap aksi Livewire,
+        // sehingga perubahan di Admin → Hak Akses langsung berlaku tanpa menunggu muat ulang halaman.
+        \Livewire\Livewire::addPersistentMiddleware([
+            \App\Http\Middleware\AccessMiddleware::class,
+        ]);
     }
 }

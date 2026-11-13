@@ -74,6 +74,8 @@ class Dashboard extends Component
                 abort(403, 'Anda tidak memiliki akses ke halaman ini.');
             }
             $this->isAdminMode = true;
+        } elseif (!Auth::user()->canAccessAsmaraPermohonan()) {
+            abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
     }
 

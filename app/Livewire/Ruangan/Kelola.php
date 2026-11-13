@@ -33,7 +33,7 @@ class Kelola extends Component
 
     public function mount(): void
     {
-        if (! Auth::user()->canManageBookings()) {
+        if (! Auth::user()->hasAccess('ruangan.kelola')) {
             abort(403, 'Anda tidak memiliki hak akses ke halaman Kelola Ruangan.');
         }
     }
@@ -155,7 +155,7 @@ class Kelola extends Component
 
     private function authorizeManager(): void
     {
-        if (! Auth::user()->canManageBookings()) {
+        if (! Auth::user()->hasAccess('ruangan.kelola')) {
             abort(403, 'Anda tidak memiliki hak untuk melakukan aksi ini.');
         }
     }

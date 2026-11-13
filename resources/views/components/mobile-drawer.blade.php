@@ -134,21 +134,23 @@
                 @endif
 
                 <!-- Ruangan -->
-                @if(auth()->user()->canAccessPeminjaman() || auth()->user()->canManageBookings())
+                @if(auth()->user()->hasAccess('ruangan.peminjaman') || auth()->user()->hasAccess('ruangan.persetujuan') || auth()->user()->hasAccess('ruangan.kelola'))
                 <div class="pt-2 border-t border-slate-100">
                     <p class="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Peminjaman Ruangan</p>
                     <div class="space-y-1">
-                        @if(auth()->user()->canAccessPeminjaman())
+                        @if(auth()->user()->hasAccess('ruangan.peminjaman'))
                         <a wire:navigate.hover href="{{ route('ruangan.peminjaman') }}" @click="closeMobileDrawer()"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-xs transition text-left font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700">
                             <span>Ajukan Peminjaman Ruangan</span>
                         </a>
                         @endif
-                        @if(auth()->user()->canManageBookings())
+                        @if(auth()->user()->hasAccess('ruangan.persetujuan'))
                         <a wire:navigate.hover href="{{ route('ruangan.persetujuan') }}" @click="closeMobileDrawer()"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-xs transition text-left font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700">
                             <span>Persetujuan Peminjaman Ruangan</span>
                         </a>
+                        @endif
+                        @if(auth()->user()->hasAccess('ruangan.kelola'))
                         <a wire:navigate.hover href="{{ route('ruangan.kelola') }}" @click="closeMobileDrawer()"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-xs transition text-left font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700">
                             <span>Kelola Ruangan</span>
@@ -281,10 +283,11 @@
                 @endif
 
                 <!-- Category 5: Admin (Administrator Only) -->
-                @if(auth()->user()->isAdministrator())
+                @if(auth()->user()->hasAccess('admin.user') || auth()->user()->hasAccess('admin.log') || auth()->user()->hasAccess('admin.hak_akses'))
                 <div class="pt-2 border-t border-slate-100">
                     <p class="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">Administrasi Sistem (Admin)</p>
                     <div class="space-y-1">
+                        @if(auth()->user()->hasAccess('admin.user'))
                         <a wire:navigate.hover href="{{ route('admin.user') }}" @click="closeMobileDrawer()"
                             @class([
                                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-none text-xs transition text-left group cursor-pointer',
@@ -296,6 +299,8 @@
                             </svg>
                             <span>Manajemen Pegawai</span>
                         </a>
+                        @endif
+                        @if(auth()->user()->hasAccess('admin.log'))
                         <a wire:navigate.hover href="{{ route('admin.log') }}" @click="closeMobileDrawer()"
                             @class([
                                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-none text-xs transition text-left group cursor-pointer',
@@ -307,6 +312,18 @@
                             </svg>
                             <span>Log Aktivitas Aplikasi</span>
                         </a>
+                        @endif
+                        @if(auth()->user()->hasAccess('admin.hak_akses'))
+                        <a wire:navigate.hover href="{{ route('admin.hak-akses') }}" @click="closeMobileDrawer()"
+                            @class([
+                                'w-full flex items-center gap-3 px-3 py-2.5 rounded-none text-xs transition text-left group cursor-pointer',
+                                'bg-brand-50 text-brand-700 font-bold border-l-4 border-brand-600' => request()->routeIs('admin.hak-akses'),
+                                'font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700' => !request()->routeIs('admin.hak-akses'),
+                            ])>
+                            <svg class="w-4 h-4 shrink-0 {{ request()->routeIs('admin.hak-akses') ? 'text-brand-600' : 'text-slate-400 group-hover:text-brand-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            <span>Hak Akses</span>
+                        </a>
+                        @endif
                     </div>
                 </div>
                 @endif

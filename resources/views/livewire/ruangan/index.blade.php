@@ -51,8 +51,8 @@
                     </p>
                 </div>
 
-                <x-persetujuan.header-actions :create="auth()->user()->canAccessPeminjaman()" create-label="Peminjaman" create-action="showModal = true"
-                    :export="auth()->user()->canManageBookings()" />
+                <x-persetujuan.header-actions :create="auth()->user()->hasAccess('ruangan.peminjaman')" create-label="Peminjaman" create-action="showModal = true"
+                    :export="auth()->user()->hasAccess('ruangan.export')" />
             </div>
         @else
         <div class="mb-8">
@@ -344,7 +344,7 @@
     </div>
 
     <!-- Modal Form Pengajuan -->
-    @if(auth()->user()->canAccessPeminjaman())
+    @if(auth()->user()->hasAccess('ruangan.peminjaman'))
     <x-modal show="showModal" maxWidth="max-w-lg">
         <x-slot:header>
             <div class="flex items-center justify-between w-full">
@@ -408,7 +408,7 @@
 
     <x-ruangan.confirm-modal />
 
-    @if($isReviewerMode && auth()->user()->canManageBookings())
+    @if($isReviewerMode && auth()->user()->hasAccess('ruangan.export'))
         <x-persetujuan.export-modal title="Export Laporan Peminjaman Ruangan" :url="route('ruangan.export')" />
     @endif
 </div>

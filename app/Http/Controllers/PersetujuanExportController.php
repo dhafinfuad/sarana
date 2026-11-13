@@ -21,7 +21,7 @@ class PersetujuanExportController extends Controller
     public function permisi(Request $request): BinaryFileResponse
     {
         $user = Auth::user();
-        abort_unless($user->isAdministrator() || $user->isSubbagUmum(), 403, 'Anda tidak memiliki hak untuk mengekspor laporan.');
+        abort_unless($user->hasAccess('permisi.export'), 403, 'Anda tidak memiliki hak untuk mengekspor laporan.');
 
         [$sm, $sy, $em, $ey] = $this->period($request);
 
@@ -30,7 +30,7 @@ class PersetujuanExportController extends Controller
 
     public function ruangan(Request $request): BinaryFileResponse
     {
-        abort_unless(Auth::user()->canManageBookings(), 403, 'Anda tidak memiliki hak untuk mengekspor laporan.');
+        abort_unless(Auth::user()->hasAccess('ruangan.export'), 403, 'Anda tidak memiliki hak untuk mengekspor laporan.');
 
         [$sm, $sy, $em, $ey] = $this->period($request);
 

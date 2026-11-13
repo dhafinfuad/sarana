@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Alias 'role' untuk RoleMiddleware — digunakan di routes/web.php
         $middleware->alias([
             'role' => RoleMiddleware::class,
+            'access' => \App\Http\Middleware\AccessMiddleware::class,
         ]);
 
         // Redirect unauthenticated users ke /login (bukan /home default Laravel)

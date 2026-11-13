@@ -32,6 +32,13 @@ class Riwayat extends Component
     public ?Booking $detailPeminjaman = null;
     public bool $showDetailModal = false;
 
+    public function mount(): void
+    {
+        if (! auth()->user()->canAccessPeminjaman()) {
+            abort(403, 'Anda tidak memiliki hak akses ke halaman Riwayat Peminjaman.');
+        }
+    }
+
     public function updated($property): void
     {
         if (in_array($property, ['search', 'status', 'startDate', 'endDate'])) {

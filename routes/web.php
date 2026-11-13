@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 // ---------------------------------------------------------------------------
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect()->route('peminjaman.index');
+        return redirect(Auth::user()->homeRoute());
     }
     return redirect()->route('login');
 });
@@ -66,7 +66,7 @@ Route::middleware('auth')->put('/change-password', function (\Illuminate\Http\Re
 // Route Admin — dilindungi auth + role
 // FLOW 3: Dasbor Analitik & Approval (flow-brief.md)
 // ---------------------------------------------------------------------------
-Route::middleware(['auth', 'role:Administrator,Kepala Kantor,Subbagian Umum dan Kepatuhan Internal'])
+Route::middleware(['auth'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -74,17 +74,17 @@ Route::middleware(['auth', 'role:Administrator,Kepala Kantor,Subbagian Umum dan 
          * GET /admin/dashboard — Dasbor analitik
          * Menggunakan Livewire component Admin/Dashboard
          */
-        Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)->name('dashboard');
+        Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)->middleware('access:kendaraan.dashboard')->name('dashboard');
 
         /**
          * GET /admin/user — Manajemen User
          */
-        Route::get('/user', \App\Livewire\Admin\UserManagement::class)->name('user');
+        Route::get('/user', \App\Livewire\Admin\UserManagement::class)->middleware('access:admin.user')->name('user');
 
         /**
          * GET /admin/fleet — Manajemen Armada Kendaraan (Flow 4)
          */
-        Route::get('/fleet', \App\Livewire\Admin\Fleet::class)->name('fleet');
+        Route::get('/fleet', \App\Livewire\Admin\Fleet::class)->middleware('access:kendaraan.armada')->name('fleet');
 
         /**
          * GET /admin/export-bookings?month=&year= — Unduh laporan peminjaman .xlsx
@@ -111,15 +111,16 @@ Route::middleware(['auth', 'role:Administrator,Kepala Kantor,Subbagian Umum dan 
                 new \App\Exports\BookingsExport($startMonth, $startYear, $endMonth, $endYear),
                 $filename
             );
-        })->name('export-bookings');
+        })->middleware('access:kendaraan.pengajuan_export')->name('export-bookings');
     });
 
 // Route khusus Administrator
-Route::middleware(['auth', 'role:Administrator'])
+Route::middleware(['auth'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/log', \App\Livewire\Admin\ActivityLog::class)->name('log');
+        Route::get('/log', \App\Livewire\Admin\ActivityLog::class)->middleware('access:admin.log')->name('log');
+        Route::get('/hak-akses', \App\Livewire\Admin\HakAkses::class)->middleware('access:admin.hak_akses')->name('hak-akses');
     });
 
 // ---------------------------------------------------------------------------
