@@ -272,9 +272,8 @@ class RuanganTest extends TestCase
 
         Livewire::actingAs($this->admin())->test(Index::class, ['mode' => 'reviewer'])
             ->call('edit', $b->id)
-            ->set('tanggalMulai', now()->addDay()->setTime(10, 0)->format('Y-m-d\TH:i'))
-            ->set('tanggalSelesai', now()->addDay()->setTime(12, 0)->format('Y-m-d\TH:i'))
-            ->call('update')->assertHasErrors(['tanggalMulai']);
+            ->set('mulaiMenit', 10 * 60)->set('selesaiMenit', 12 * 60)
+            ->call('update')->assertHasErrors(['mulaiMenit']);
     }
 
     public function test_pemohon_can_edit_and_delete_only_own_pending(): void
@@ -618,5 +617,57 @@ class RuanganTest extends TestCase
         $c = Livewire::actingAs($u)->test(Index::class)->instance();
         $this->assertSame([['s' => 1320, 'e' => 1440, 'st' => 'ok']], $c->jadwal(now()->addDay()->toDateString())['rooms'][0]['busy']);
         $this->assertSame([['s' => 0, 'e' => 480, 'st' => 'ok']], $c->jadwal(now()->addDays(2)->toDateString())['rooms'][0]['busy']);
+    }
+    // ---- Edit lewat pemilih jadwal ----
+
+    public function test_edit_fills_picker_state_and_update_changes_room_and_time(): void
+    {
+        $a = $this->room(['nama' => 'Ruang A', 'kapasitas' => 10]);
+        $b = $this->room(['nama' => 'Ruang B', 'kapasitas' => 10]);
+        $u = $this->pegawai();
+        $bk = $this->booking($a, $u, now()->addDay()->setTime(9, 0), now()->addDay()->setTime(10, 30));
+
+        $c = Livewire::actingAs($u)->test(Index::class)->call('edit', $bk->id)
+            ->assertSet('roomId', (string) $a->id)->assertSet('mulaiMenit', 540)->assertSet('selesaiMenit', 630)
+            ->assertSet('tanggal', now()->addDay()->toDateString())->assertDispatched('open-room-edit');
+
+        $c->set('roomId', (string) $b->id)->set('mulaiMenit', 13 * 60 + 15)->set('selesaiMenit', 14 * 60)->call('update')->assertHasNoErrors();
+
+        $bk->refresh();
+        $this->assertSame($b->id, $bk->room_id);
+        $this->assertSame('13:15', $bk->tanggal_mulai->format('H:i'));
+        $this->assertSame('14:00', $bk->tanggal_selesai->format('H:i'));
+        $this->assertSame('pending', $bk->status);
+    }
+
+    public function test_edit_ignores_own_booking_for_overlap_but_rejects_others(): void
+    {
+        $room = $this->room();
+        $u = $this->pegawai();
+        $own = $this->booking($room, $u, now()->addDay()->setTime(9, 0), now()->addDay()->setTime(10, 0));
+        $this->booking($room, $u, now()->addDay()->setTime(11, 0), now()->addDay()->setTime(12, 0), 'disetujui');
+
+        $c = Livewire::actingAs($u)->test(Index::class)->call('edit', $own->id);
+        $c->set('mulaiMenit', 9 * 60 + 30)->set('selesaiMenit', 10 * 60 + 30)->call('update')->assertHasNoErrors();   // melewati miliknya sendiri
+        $c = Livewire::actingAs($u)->test(Index::class)->call('edit', $own->id);
+        $c->set('mulaiMenit', 10 * 60 + 30)->set('selesaiMenit', 11 * 60 + 15)->call('update')->assertHasErrors(['mulaiMenit']);
+
+        $jadwal = Livewire::actingAs($u)->test(Index::class)->instance()->jadwal(now()->addDay()->toDateString(), $own->id);
+        $this->assertSame([['s' => 660, 'e' => 720, 'st' => 'ok']], $jadwal['rooms'][0]['busy']);   // miliknya tidak dihitung
+    }
+
+    public function test_edit_keeps_old_odd_times_when_only_text_changes_but_applies_rules_when_time_changes(): void
+    {
+        $room = $this->room();
+        $u = $this->pegawai();
+        $bk = $this->booking($room, $u, now()->addDay()->setTime(9, 4), now()->addDay()->setTime(10, 26));   // data lama bermenit tidak kelipatan 15
+
+        Livewire::actingAs($u)->test(Index::class)->call('edit', $bk->id)
+            ->set('keperluan', 'Rapat koordinasi diperbarui')->call('update')->assertHasNoErrors();
+        $this->assertSame('Rapat koordinasi diperbarui', $bk->fresh()->keperluan);
+        $this->assertSame('09:04', $bk->fresh()->tanggal_mulai->format('H:i'));
+
+        Livewire::actingAs($u)->test(Index::class)->call('edit', $bk->id)
+            ->set('mulaiMenit', 9 * 60 + 10)->call('update')->assertHasErrors(['mulaiMenit']);
     }
 }

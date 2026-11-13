@@ -1,7 +1,7 @@
 {{--
     Modal pengajuan peminjaman ruangan: pemilih jadwal (tanggal, jumlah orang, ketuk jadwal per 15 menit).
     Logika di resources/js/booking-picker.js; server memvalidasi ulang di Ruangan\Index::submit().
-    Dipakai di halaman Peminjaman dan Persetujuan (tombol header). Butuh x-data induk dengan showModal.
+    Dipakai di halaman Peminjaman dan Persetujuan (tombol header) untuk pengajuan baru, dan oleh tombol Edit (mode edit). Butuh x-data induk dengan showModal.
 --}}
 @php
     $pickerCfg = [
@@ -13,11 +13,11 @@
     $inputCls = 'px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-brand-600 text-xs';
 @endphp
 
-<div x-data="bookingPicker($wire, @js($pickerCfg))" @close-room-modal.window="reset()">
+<div x-data="bookingPicker($wire, @js($pickerCfg))" @close-room-modal.window="reset()" @open-room-edit.window="mulaiEdit($event.detail); showModal = true">
     <x-modal show="showModal" maxWidth="max-w-3xl">
         <x-slot:header>
             <div class="flex items-center justify-between w-full">
-                <h3 class="text-base font-bold text-slate-900">Pengajuan Peminjaman Ruangan</h3>
+                <h3 class="text-base font-bold text-slate-900" x-text="editId ? 'Edit Peminjaman Ruangan' : 'Pengajuan Peminjaman Ruangan'">Pengajuan Peminjaman Ruangan</h3>
                 <button @click="showModal = false" type="button" aria-label="Tutup" class="text-slate-400 hover:text-slate-700 text-xl leading-none cursor-pointer">&times;</button>
             </div>
         </x-slot:header>
@@ -109,7 +109,7 @@
             </button>
             <button type="button" @click="kirim()" :disabled="!valid || sending"
                 class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold text-xs shadow-md shadow-brand-600/25 transition cursor-pointer flex items-center gap-1.5 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed">
-                <span>Ajukan Peminjaman</span>
+                <span x-text="editId ? 'Simpan Perubahan' : 'Ajukan Peminjaman'">Ajukan Peminjaman</span>
                 <span x-show="sending" class="material-symbols-outlined animate-spin text-[14px]">refresh</span>
             </button>
         </x-slot:footer>

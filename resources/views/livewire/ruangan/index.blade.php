@@ -1,7 +1,6 @@
 <div x-data="{
     showModal: false,
     showExportModal: false,
-    showEditModal: false,
     showDetailModal: false,
     detail: {},
     showConfirmModal: false,
@@ -30,9 +29,7 @@
         }
         this.showConfirmModal = false;
     }
-}" @close-room-modal.window="showModal = false"
-  @open-booking-edit-modal.window="showEditModal = true"
-  @close-booking-edit-modal.window="showEditModal = false">
+}" @close-room-modal.window="showModal = false">
 
     @if(!auth()->user()->canAccessAdminDashboard())
         <x-top-header title="{{ $isReviewerMode ? 'Persetujuan Ruangan' : 'Peminjaman Ruangan' }}" />
@@ -347,37 +344,6 @@
     @if(auth()->user()->hasAccess('ruangan.peminjaman'))
         @include('livewire.ruangan.partials.picker-modal')
     @endif
-
-    <!-- Modal Edit Peminjaman -->
-    <x-modal show="showEditModal" maxWidth="max-w-lg">
-        <x-slot:header>
-            <div class="flex justify-between items-center w-full">
-                <h2 class="text-base font-bold text-slate-900">Edit Peminjaman Ruangan</h2>
-                <button @click="showEditModal = false; $wire.resetForm()" type="button" aria-label="Tutup"
-                    class="text-slate-400 hover:text-slate-700 p-1 text-xl leading-none transition-colors cursor-pointer">
-                    &times;
-                </button>
-            </div>
-        </x-slot:header>
-
-        <form id="form-edit-peminjaman-ruangan" wire:submit.prevent="update" class="space-y-4 text-xs">
-            @include('livewire.ruangan.partials.booking-fields', ['roomOptions' => $this->editRooms])
-        </form>
-
-        <x-slot:footer>
-            <div class="flex justify-end gap-2.5 w-full">
-                <button type="button" @click="showEditModal = false; $wire.resetForm()"
-                    class="px-5 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition text-xs cursor-pointer">
-                    Batal
-                </button>
-                <button type="submit" form="form-edit-peminjaman-ruangan"
-                    class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md shadow-brand-600/25 transition text-xs cursor-pointer">
-                    <span wire:loading.remove wire:target="update">Simpan Perubahan</span>
-                    <span wire:loading wire:target="update">Memproses...</span>
-                </button>
-            </div>
-        </x-slot:footer>
-    </x-modal>
 
     @if(!$isReviewerMode)
         <x-riwayat.detail-modal />
