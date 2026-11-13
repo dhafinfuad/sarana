@@ -12,12 +12,6 @@
                 <p class="text-slate-500 text-sm mt-1 leading-normal">Atur menu, halaman, dan tombol yang dapat dipakai setiap peran.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
-                @if($this->dirtyCount > 0)
-                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                        {{ $this->dirtyCount }} perubahan belum disimpan
-                    </span>
-                    <button type="button" wire:click="discard" class="text-xs font-semibold text-slate-500 hover:text-slate-700 hover:underline cursor-pointer">Batalkan</button>
-                @endif
                 <button type="button" @click="confirmAction = 'reset'; showConfirm = true"
                     class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs shadow-2xs hover:border-slate-300 transition flex items-center gap-2 cursor-pointer">
                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>

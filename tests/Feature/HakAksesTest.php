@@ -222,7 +222,8 @@ class HakAksesTest extends TestCase
     public function test_hak_akses_page_is_for_administrator_only(): void
     {
         $this->actingAs($this->user('Administrator', null))->get('/admin/hak-akses')->assertOk()
-            ->assertSee('Hak Akses')->assertSee('Cek Pengguna')->assertSee('Simpan Perubahan');
+            ->assertSee('Hak Akses')->assertSee('Cek Pengguna')->assertSee('Simpan Perubahan')
+            ->assertDontSee('belum disimpan')->assertDontSee('wire:click="discard"', false);
 
         foreach ([$this->user('Pelaksana', 'Subbagian Umum dan Kepatuhan Internal'), $this->user('Kepala Kantor', null), $this->user('Kepala Seksi'), $this->user('Supervisor'), $this->user()] as $u) {
             $this->actingAs($u)->get('/admin/hak-akses')->assertForbidden();
@@ -234,10 +235,9 @@ class HakAksesTest extends TestCase
         $admin = $this->user('Administrator', null);
         $slot = HakAksesPage::slot('ruangan.persetujuan');
 
-        $c = Livewire::actingAs($admin)->test(HakAksesPage::class)
-            ->set("matrix.$slot.pegawai", true);
-        $this->assertSame(1, $c->instance()->dirtyCount());
-        $c->call('save');
+        Livewire::actingAs($admin)->test(HakAksesPage::class)
+            ->set("matrix.$slot.pegawai", true)
+            ->call('save');
 
         $this->assertTrue($this->user()->hasAccess('ruangan.persetujuan'));
         $log = ActivityLog::where('route_name', 'admin.hak-akses.update')->latest('id')->first();
