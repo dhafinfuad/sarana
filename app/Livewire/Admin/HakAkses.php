@@ -53,23 +53,6 @@ class HakAkses extends Component
         return $out;
     }
 
-    /** Jumlah sel yang diubah tetapi belum disimpan. */
-    #[Computed]
-    public function dirtyCount(): int
-    {
-        $saved = Matrix::matrix();
-        $count = 0;
-        foreach ($this->edited() as $key => $roles) {
-            foreach ($roles as $role => $value) {
-                if ($value !== ($saved[$key][$role] ?? false)) {
-                    $count++;
-                }
-            }
-        }
-
-        return $count;
-    }
-
     public function save(): void
     {
         $this->authorizeAdmin();
@@ -89,11 +72,6 @@ class HakAkses extends Component
         $this->loadMatrix();
         $this->dispatch('close-hak-akses-confirm');
         session()->flash('success', 'Semua hak akses dikembalikan ke pengaturan bawaan.');
-    }
-
-    public function discard(): void
-    {
-        $this->loadMatrix();
     }
 
     // ---- Cek Pengguna ----
