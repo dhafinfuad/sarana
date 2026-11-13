@@ -19,9 +19,13 @@ window.bookingPicker = function ($wire, cfg) {
         loading: false,
         sending: false,
         ticket: 0,
+        editId: null,                 // id peminjaman yang sedang diedit (null = pengajuan baru)
 
         init() {
-            this.$watch('showModal', (open) => { if (open) this.load(); });
+            this.$watch('showModal', (open) => {
+                if (open) this.load();
+                else if (this.editId) this.reset();        // batal edit: jangan bawa data edit ke pengajuan baru
+            });
             this.$watch('jumlah', () => {
                 const r = this.room;
                 if (r && this.kurang(r)) this.clearSelection();
@@ -33,7 +37,7 @@ window.bookingPicker = function ($wire, cfg) {
             const ticket = ++this.ticket;
             this.loading = true;
             try {
-                const d = await $wire.jadwal(this.tanggal);
+                const d = await $wire.jadwal(this.tanggal, this.editId);
                 if (ticket !== this.ticket) return;
                 this.data = d;
                 this.tanggal = d.tanggal;
@@ -112,7 +116,20 @@ window.bookingPicker = function ($wire, cfg) {
             this.roomId = r.id; this.s = a; this.e = b; this.picking = true;
         },
         ulangi() { this.clearSelection(); },
+        /** Dibuka dari tombol Edit (event open-room-edit): isi pemilih dari data peminjaman. */
+        mulaiEdit(d) {
+            this.editId = d.id;
+            this.tanggal = d.tanggal;
+            this.jumlah = String(d.jumlah);
+            this.keperluan = d.keperluan;
+            this.roomId = d.roomId;
+            this.s = d.mulai;
+            this.e = d.selesai;
+            this.picking = false;
+            this.load();
+        },
         reset() {
+            this.editId = null;
             this.clearSelection();
             this.jumlah = '';
             this.keperluan = '';
@@ -163,7 +180,7 @@ window.bookingPicker = function ($wire, cfg) {
                 $wire.$set('tanggal', this.tanggal, false);
                 $wire.$set('mulaiMenit', this.s, false);
                 $wire.$set('selesaiMenit', this.e, false);
-                await $wire.submit();
+                await (this.editId ? $wire.update() : $wire.submit());
             } finally {
                 this.sending = false;
             }
