@@ -307,28 +307,6 @@
                                     <span class="w-1.5 h-1.5 rounded-full {{ $badge['dot'] }}"></span>
                                     {{ $badge['label'] }}
                                 </span>
-                                @if($item->show_actions)
-                                    <div class="inline-flex items-center gap-0.5">
-                                        {{-- Batalkan --}}
-                                        <button type="button" @if($item->can_cancel) @click="openConfirm('cancel', {{ $item->id }}, 'Batalkan Permohonan', 'Apakah Anda yakin ingin membatalkan permohonan izin ini?')" @else disabled @endif
-                                            @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-rose-600 hover:bg-rose-50 hover:border-rose-200 cursor-pointer' => $item->can_cancel, 'text-slate-300 cursor-not-allowed' => !$item->can_cancel])
-                                            title="{{ $item->can_cancel ? 'Batalkan Permohonan' : 'Hanya permohonan Pending yang dapat dibatalkan' }}">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                                        </button>
-                                        {{-- Edit --}}
-                                        <button type="button" @if($item->can_edit) wire:click="editBooking({{ $item->id }})" @else disabled @endif
-                                            @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-amber-600 hover:bg-amber-50 hover:border-amber-200 cursor-pointer' => $item->can_edit, 'text-slate-300 cursor-not-allowed' => !$item->can_edit])
-                                            title="{{ $item->can_edit ? 'Edit Permohonan' : 'Tidak dapat diedit' }}">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                        </button>
-                                        {{-- Hapus --}}
-                                        <button type="button" @if($item->can_delete) @click="openConfirm('delete', {{ $item->id }}, 'Hapus Permohonan', 'Apakah Anda yakin ingin menghapus permohonan ini?')" @else disabled @endif
-                                            @class(['p-1 rounded-lg border border-transparent transition shrink-0', 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 cursor-pointer' => $item->can_delete, 'text-slate-300 cursor-not-allowed' => !$item->can_delete])
-                                            title="{{ $item->can_delete ? 'Hapus Permohonan' : 'Tidak dapat dihapus' }}">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                    </div>
-                                @endif
                                 <button type="button" @click="detail = @js($payload); showDetailModal = true"
                                     class="px-3 py-1 rounded-xl text-[11px] font-bold border border-brand-200 text-brand-700 bg-brand-50/50 hover:bg-brand-100 transition flex items-center gap-1.5 cursor-pointer"
                                     title="Klik untuk melihat detail">

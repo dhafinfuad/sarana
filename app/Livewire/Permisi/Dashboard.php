@@ -252,7 +252,6 @@ class Dashboard extends Component
             ->get()
             ->each(function (Permisi $p) {
                 $pending = $p->status === 'pending';
-                $p->setAttribute('show_actions', $pending);
                 $p->setAttribute('can_edit', $pending);
                 $p->setAttribute('can_cancel', $pending);
                 $p->setAttribute('can_delete', $pending);
