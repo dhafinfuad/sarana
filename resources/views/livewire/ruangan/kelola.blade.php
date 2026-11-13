@@ -18,6 +18,8 @@
     executeAction() {
         if (this.confirmAction === 'activate' || this.confirmAction === 'deactivate') {
             $wire.toggleStatus(this.confirmId);
+        } else if (this.confirmAction === 'hapus') {
+            $wire.hapus(this.confirmId);
         }
         this.showConfirmModal = false;
     }
@@ -54,6 +56,15 @@
                 <div class="flex-1 min-w-0">
                     <p class="text-xs sm:text-sm font-bold text-emerald-900">Berhasil</p>
                     <p class="text-xs sm:text-sm text-emerald-700 mt-0.5 leading-relaxed">{{ session('success') }}</p>
+                </div>
+            </div>
+        @endif
+
+        @if (session()->has('error'))
+            <div role="alert" class="mb-6 p-4 rounded-2xl bg-rose-50/90 border border-rose-200/80 shadow-xs flex items-start gap-3">
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs sm:text-sm font-bold text-rose-900">Gagal</p>
+                    <p class="text-xs sm:text-sm text-rose-700 mt-0.5 leading-relaxed">{{ session('error') }}</p>
                 </div>
             </div>
         @endif
@@ -123,6 +134,12 @@
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                             </button>
                                         @endif
+                                        <button type="button"
+                                            @click="openConfirm('hapus', {{ $room->id }}, 'Hapus Ruangan', 'Ruangan {{ e(addslashes($room->nama)) }} akan dihapus permanen. Ruangan yang sudah punya riwayat peminjaman tidak dapat dihapus. Lanjutkan?')"
+                                            class="p-1 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition cursor-pointer shrink-0"
+                                            title="Hapus Ruangan">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

@@ -147,6 +147,21 @@ class Kelola extends Component
             : 'Ruangan dinonaktifkan. Pengajuan yang sudah ada tidak berubah.');
     }
 
+    public function hapus(int $id): void
+    {
+        $this->authorizeManager();
+        $room = Room::findOrFail($id);
+
+        if ($room->bookings()->exists()) {
+            session()->flash('error', 'Ruangan tidak dapat dihapus karena sudah memiliki riwayat peminjaman. Nonaktifkan saja.');
+
+            return;
+        }
+
+        $room->delete();
+        session()->flash('success', 'Ruangan berhasil dihapus.');
+    }
+
     public function resetForm(): void
     {
         $this->reset(['editId', 'nama', 'lokasi', 'kapasitas', 'fasilitas']);

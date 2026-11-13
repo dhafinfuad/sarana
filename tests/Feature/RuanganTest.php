@@ -174,6 +174,21 @@ class RuanganTest extends TestCase
         $this->actingAs($this->admin())->get('/ruangan/kelola')->assertOk()->assertSee('Tambah Ruangan');
     }
 
+    public function test_admin_can_delete_room_only_without_booking_history(): void
+    {
+        $admin = $this->admin();
+        $kosong = $this->room(['nama' => 'Kosong']);
+        $terpakai = $this->room(['nama' => 'Terpakai']);
+        $this->booking($terpakai, $this->pegawai(), now()->addDay()->setTime(9, 0)->toDateTimeString(), now()->addDay()->setTime(10, 0)->toDateTimeString());
+
+        Livewire::actingAs($admin)->test(Kelola::class)->call('hapus', $kosong->id);
+        $this->assertNull(Room::find($kosong->id));
+
+        Livewire::actingAs($admin)->test(Kelola::class)->call('hapus', $terpakai->id);
+        $this->assertNotNull(Room::find($terpakai->id));
+
+    }
+
     public function test_admin_can_add_edit_and_toggle_room(): void
     {
         $admin = $this->admin();
