@@ -337,7 +337,7 @@ class RuanganTest extends TestCase
         }
     }
 
-    public function test_recent_list_shows_only_five_newest_and_actions_only_for_pending(): void
+    public function test_recent_list_shows_only_five_newest_without_action_buttons(): void
     {
         $room = $this->room();
         $u = $this->pegawai();
@@ -349,14 +349,8 @@ class RuanganTest extends TestCase
         $recent = $c->instance()->recent();
         $this->assertCount(5, $recent);
         $this->assertSame(7, $recent->first()->id);                        // terbaru dulu
-        $this->assertTrue((bool) $recent->first()->show_actions);          // Pending: aksi tampil
-        $this->assertFalse((bool) $recent->last()->show_actions);          // Disetujui: aksi disembunyikan
-        $c->assertSee('Lihat Semua Riwayat')->assertDontSee('Semua Status');
-
-        // semua peran sama: hanya Pending yang menampilkan tombol aksi
-        $kepala = $this->makeUser(['jabatan' => 'Kepala Seksi', 'seksi' => 'Seksi Pelayanan']);
-        $this->booking($room, $kepala, now()->addDays(20)->setTime(9, 0), now()->addDays(20)->setTime(10, 0), 'disetujui');
-        $this->assertFalse((bool) Livewire::actingAs($kepala)->test(Index::class)->instance()->recent()->first()->show_actions);
+        $c->assertSee('Lihat Semua Riwayat')->assertDontSee('Semua Status')
+            ->assertDontSee('Batalkan Peminjaman')->assertDontSee('title="Edit"', false);
     }
 
     public function test_riwayat_page_lists_all_with_filter_and_pagination(): void

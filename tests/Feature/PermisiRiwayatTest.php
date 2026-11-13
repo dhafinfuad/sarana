@@ -77,21 +77,13 @@ class PermisiRiwayatTest extends TestCase
         $c->assertSee('Lihat Semua Riwayat')->assertSee('Overview Status Permohonan')->assertDontSee('Semua Status');
     }
 
-    public function test_actions_visible_only_for_pending_for_every_role(): void
+    public function test_permohonan_page_has_no_action_buttons(): void
     {
         $u = $this->user();
         $this->permisi($u, 'pending', 2);
-        $this->permisi($u, 'disetujui', 1);
 
-        $recent = Livewire::actingAs($u)->test(Dashboard::class)->instance()->recent();
-        $this->assertTrue((bool) $recent->firstWhere('status', 'pending')->show_actions);
-        $this->assertFalse((bool) $recent->firstWhere('status', 'disetujui')->show_actions);
-
-        foreach (['Kepala Seksi', 'Administrator'] as $jabatan) {
-            $x = $this->user($jabatan);
-            $this->permisi($x, 'disetujui');
-            $this->assertFalse((bool) Livewire::actingAs($x)->test(Dashboard::class)->instance()->recent()->first()->show_actions);
-        }
+        Livewire::actingAs($u)->test(Dashboard::class)
+            ->assertDontSee('Batalkan Permohonan')->assertSee('Detail');
     }
 
     public function test_delete_rules_for_pemohon(): void

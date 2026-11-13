@@ -236,7 +236,6 @@ class Index extends Component
             $b->setAttribute('can_edit', $this->userCanEdit($b));
             $b->setAttribute('can_delete', $this->userCanDelete($b));
             $b->setAttribute('can_cancel', ! $this->isReviewerMode && $b->user_id === $user->id && $b->status === 'pending');
-            $b->setAttribute('show_actions', $b->status === 'pending');
         });
     }
 
