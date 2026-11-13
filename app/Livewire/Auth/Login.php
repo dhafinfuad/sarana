@@ -96,9 +96,7 @@ class Login extends Component
                 RateLimiter::clear($rateLimiterKey);
                 Auth::login($demoUser, $this->remember);
                 session()->regenerate();
-                $redirectRoute = $demoUser->canAccessAdminDashboard() 
-                    ? route('admin.dashboard') 
-                    : route('peminjaman.index');
+                $redirectRoute = $demoUser->homeRoute();
                 $this->redirect($redirectRoute, navigate: true);
                 return;
             }
@@ -143,9 +141,7 @@ class Login extends Component
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        $redirectRoute = $user->canAccessAdminDashboard() 
-            ? route('admin.dashboard') 
-            : route('peminjaman.index');
+        $redirectRoute = $user->homeRoute();
 
         $this->redirect($redirectRoute, navigate: true);
     }

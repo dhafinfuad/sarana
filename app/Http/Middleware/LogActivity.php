@@ -27,6 +27,7 @@ class LogActivity
         'admin.user' => ['label' => 'Manajemen Pegawai', 'group' => 'Admin'],
         'admin.fleet' => ['label' => 'Manajemen Armada', 'group' => 'Sarana'],
         'admin.log' => ['label' => 'Log Aplikasi', 'group' => 'Admin'],
+        'admin.hak-akses' => ['label' => 'Hak Akses', 'group' => 'Admin'],
     ];
 
     /**

@@ -146,6 +146,7 @@ class Fleet extends Component
      */
     public function save(): void
     {
+        $this->authorizeKelola();
         $this->validate();
 
         $imagePath = null;
@@ -171,6 +172,7 @@ class Fleet extends Component
      */
     public function update(): void
     {
+        $this->authorizeKelola();
         \Log::info('Update called', ['editingId' => $this->editingId, 'editPhoto' => $this->editPhoto ? 'Yes' : 'No']);
         $this->validate();
 
@@ -205,6 +207,7 @@ class Fleet extends Component
      */
     public function toggleStatus(int $id): void
     {
+        $this->authorizeKelola();
         $vehicle = Vehicle::findOrFail($id);
         $vehicle->toggleStatus();
     }
@@ -216,6 +219,7 @@ class Fleet extends Component
      */
     public function delete(): void
     {
+        $this->authorizeKelola();
         $vehicle = Vehicle::findOrFail($this->deletingId);
 
         // Guard: cek booking aktif (flow-brief §FLOW 4 — integritas referensial)
@@ -291,5 +295,11 @@ class Fleet extends Component
         $this->status = 'tersedia';
         $this->resetErrorBag();
         $this->resetValidation();
+    }
+
+    /** Aksi pengelolaan armada hanya untuk peran dengan hak "Tambah, Ubah, Nonaktifkan Armada". */
+    private function authorizeKelola(): void
+    {
+        abort_unless(\Illuminate\Support\Facades\Auth::user()->canManageArmada(), 403, 'Anda tidak memiliki hak untuk mengelola armada.');
     }
 }

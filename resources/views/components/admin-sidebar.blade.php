@@ -60,7 +60,7 @@
         </a>
 
         <!-- MENU RUANGAN -->
-        @if(auth()->user()->canManageBookings())
+        @if(auth()->user()->hasAccess('ruangan.peminjaman') || auth()->user()->hasAccess('ruangan.persetujuan') || auth()->user()->hasAccess('ruangan.kelola'))
         <div x-data="{ open: {{ request()->routeIs('ruangan.*') ? 'true' : 'false' }} }">
             <button type="button" @click="open = !open"
                 class="w-full flex items-center justify-between gap-3 px-4 py-3 text-text-secondary hover:bg-surface-container-low rounded-lg transition-colors duration-200 cursor-pointer">
@@ -71,21 +71,27 @@
                 <span class="material-symbols-outlined text-[18px] transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
             </button>
             <div x-show="open" x-transition.opacity style="display: none;" class="mt-1 ml-4 space-y-1">
+                @if(auth()->user()->hasAccess('ruangan.peminjaman'))
                 <a wire:navigate.hover href="{{ route('ruangan.peminjaman') }}" @class([
                     'flex items-center gap-3 px-4 py-2.5 rounded-lg text-[13px] transition-all duration-300',
                     'bg-secondary-fixed/50 text-on-secondary-container font-bold' => request()->routeIs('ruangan.peminjaman'),
                     'text-text-secondary font-medium hover:bg-surface-container-lowest hover:text-on-surface' => !request()->routeIs('ruangan.peminjaman'),
                 ])><span>Peminjaman</span></a>
+                @endif
+                @if(auth()->user()->hasAccess('ruangan.persetujuan'))
                 <a wire:navigate.hover href="{{ route('ruangan.persetujuan') }}" @class([
                     'flex items-center gap-3 px-4 py-2.5 rounded-lg text-[13px] transition-all duration-300',
                     'bg-secondary-fixed/50 text-on-secondary-container font-bold' => request()->routeIs('ruangan.persetujuan'),
                     'text-text-secondary font-medium hover:bg-surface-container-lowest hover:text-on-surface' => !request()->routeIs('ruangan.persetujuan'),
                 ])><span>Persetujuan</span></a>
+                @endif
+                @if(auth()->user()->hasAccess('ruangan.kelola'))
                 <a wire:navigate.hover href="{{ route('ruangan.kelola') }}" @class([
                     'flex items-center gap-3 px-4 py-2.5 rounded-lg text-[13px] transition-all duration-300',
                     'bg-secondary-fixed/50 text-on-secondary-container font-bold' => request()->routeIs('ruangan.kelola'),
                     'text-text-secondary font-medium hover:bg-surface-container-lowest hover:text-on-surface' => !request()->routeIs('ruangan.kelola'),
                 ])><span>Kelola Ruangan</span></a>
+                @endif
             </div>
         </div>
         @endif
@@ -206,6 +212,18 @@
             <span class="material-symbols-outlined transition-transform duration-300 group-hover:scale-110"
                 @if(request()->routeIs('admin.user')) style="font-variation-settings: 'FILL' 1;" @endif>group</span>
             <span class="font-label-md text-[14px]">User</span>
+        </a>
+        @endif
+
+        <!-- MENU HAK AKSES -->
+        @if(auth()->user()->hasAccess('admin.hak_akses'))
+        <a wire:navigate.hover @class([
+            'flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-transform duration-200 hover:translate-x-1',
+            'bg-secondary-fixed/50 text-on-secondary-container font-bold' => request()->routeIs('admin.hak-akses'),
+            'text-text-secondary hover:bg-surface-container-low' => !request()->routeIs('admin.hak-akses'),
+        ]) href="{{ route('admin.hak-akses') }}">
+            <span class="material-symbols-outlined">admin_panel_settings</span>
+            <span class="font-label-md text-[14px]">Hak Akses</span>
         </a>
         @endif
     </nav>

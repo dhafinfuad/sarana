@@ -50,10 +50,10 @@ class Index extends Component
         $this->isReviewerMode = $mode === 'reviewer';
         $user = Auth::user();
 
-        if ($this->isReviewerMode && ! $user->canManageBookings()) {
+        if ($this->isReviewerMode && ! $user->hasAccess('ruangan.persetujuan')) {
             abort(403, 'Anda tidak memiliki hak akses ke halaman Persetujuan Ruangan.');
         }
-        if (! $this->isReviewerMode && ! $user->canAccessPeminjaman()) {
+        if (! $this->isReviewerMode && ! $user->hasAccess('ruangan.peminjaman')) {
             abort(403, 'Anda tidak memiliki hak akses ke halaman Peminjaman Ruangan.');
         }
     }
@@ -250,7 +250,7 @@ class Index extends Component
     public function submit(): void
     {
         // Pengajuan atas nama sendiri, dari halaman Peminjaman maupun Persetujuan.
-        if (! Auth::user()->canAccessPeminjaman()) {
+        if (! Auth::user()->hasAccess('ruangan.peminjaman')) {
             abort(403, 'Anda tidak memiliki hak untuk mengajukan peminjaman ruangan.');
         }
 
@@ -370,7 +370,7 @@ class Index extends Component
         $u = Auth::user();
 
         return $this->isReviewerMode
-            ? $u->canManageBookings()
+            ? $u->hasAccess('ruangan.persetujuan')
             : ($b->user_id === $u->id && $b->status === 'pending');
     }
 
@@ -383,7 +383,7 @@ class Index extends Component
         $u = Auth::user();
 
         return $this->isReviewerMode
-            ? $u->canManageBookings()
+            ? $u->hasAccess('ruangan.persetujuan')
             : ($b->user_id === $u->id && $b->status === 'pending');
     }
 
@@ -487,7 +487,7 @@ class Index extends Component
 
     private function authorizeReviewer(): void
     {
-        if (! $this->isReviewerMode || ! Auth::user()->canManageBookings()) {
+        if (! $this->isReviewerMode || ! Auth::user()->hasAccess('ruangan.persetujuan')) {
             abort(403, 'Anda tidak memiliki hak untuk melakukan aksi ini.');
         }
     }

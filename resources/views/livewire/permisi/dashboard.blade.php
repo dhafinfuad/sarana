@@ -58,7 +58,7 @@
                 </div>
 
                 <x-persetujuan.header-actions :create="auth()->user()->canAccessPermohonanPermisi()" create-label="Permohonan" create-action="showApplicationModal = true"
-                    :export="auth()->user()->isSubbagUmum() || auth()->user()->isAdministrator()" />
+                    :export="auth()->user()->hasAccess('permisi.export')" />
             </div>
         @else
         <div class="mb-8">
@@ -136,7 +136,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         @forelse($this->permisis as $item)
-                            @php $badge = \App\Support\StatusBadge::admin($item->status); $nama = $item->user->name ?? 'Pengguna Dihapus'; $privileged = auth()->user()->isSubbagUmum() || auth()->user()->isAdministrator(); @endphp
+                            @php $badge = \App\Support\StatusBadge::admin($item->status); $nama = $item->user->name ?? 'Pengguna Dihapus'; $privileged = auth()->user()->hasAccess('permisi.persetujuan.kelola'); @endphp
                             <tr class="hover:bg-slate-50/60 transition-colors" wire:key="permisi-{{ $item->id }}">
                                 <td class="py-3 px-3 min-w-0">
                                     <p class="font-bold text-slate-900 leading-snug truncate" title="{{ $nama }}">{{ $nama }}</p>
@@ -192,7 +192,7 @@
             <!-- Mobile Card View -->
             <div class="block md:hidden space-y-3 p-4">
                 @forelse($this->permisis as $item)
-                    @php $badge = \App\Support\StatusBadge::admin($item->status); $nama = $item->user->name ?? 'Pengguna Dihapus'; $privileged = auth()->user()->isSubbagUmum() || auth()->user()->isAdministrator(); @endphp
+                    @php $badge = \App\Support\StatusBadge::admin($item->status); $nama = $item->user->name ?? 'Pengguna Dihapus'; $privileged = auth()->user()->hasAccess('permisi.persetujuan.kelola'); @endphp
                     <div class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs flex flex-col gap-3" wire:key="permisi-card-{{ $item->id }}">
                         <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
                             <div class="min-w-0 flex-1">
@@ -543,7 +543,7 @@
         <x-riwayat.detail-modal />
     @endif
 
-    @if($isReviewerMode && (auth()->user()->isSubbagUmum() || auth()->user()->isAdministrator()))
+    @if($isReviewerMode && auth()->user()->hasAccess('permisi.export'))
         <x-persetujuan.export-modal title="Export Laporan Permohonan Izin" :url="route('permisi.export')" />
     @endif
 

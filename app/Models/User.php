@@ -132,6 +132,80 @@ class User extends Authenticatable
         return ! empty($this->getManagedSeksiList());
     }
 
+    // -----------------------------------------------------------------------
+    // Hak Akses (Admin → Hak Akses): matriks per peran, lihat config/hak_akses.php
+    // -----------------------------------------------------------------------
+
+    /** @var array<int, string>|null */
+    protected ?array $rolesCache = null;
+
+    /**
+     * Peran pengguna, dihitung otomatis dari jabatan, seksi, dan PLH/PLT aktif.
+     * Satu pengguna bisa punya beberapa peran; aksesnya digabung (OR).
+     *
+     * @return array<int, string>
+     */
+    public function roles(): array
+    {
+        if ($this->rolesCache !== null) {
+            return $this->rolesCache;
+        }
+
+        $roles = [];
+        if ($this->isAdministrator()) {
+            $roles[] = 'administrator';
+        }
+        if ($this->isKepalaKantor()) {
+            $roles[] = 'kepala_kantor';
+        }
+        if ($this->isKepalaSeksi()) {
+            $roles[] = 'kepala_seksi';
+        }
+        if ($this->isSupervisor()) {
+            $roles[] = 'supervisor';
+        }
+        if ($this->isSubbagUmum()) {
+            $roles[] = 'subbag_umum';
+        }
+        if ($this->isPenjaminanKualitasData()) {
+            $roles[] = 'pkd';
+        }
+        // Semua pengguna adalah Pegawai, kecuali Kepala Kantor definitif.
+        if ($this->jabatan !== 'Kepala Kantor') {
+            $roles[] = 'pegawai';
+        }
+
+        return $this->rolesCache = $roles;
+    }
+
+    /** Apakah pengguna boleh memakai menu/halaman/tombol dengan kunci ini? */
+    public function hasAccess(string $key): bool
+    {
+        return \App\Support\HakAkses::allows($this->roles(), $key);
+    }
+
+    /** Halaman awal setelah login: halaman pertama yang boleh dibuka, menurut urutan prioritas. */
+    public function homeRoute(): string
+    {
+        $candidates = [
+            'kendaraan.dashboard' => 'admin.dashboard',
+            'kendaraan.peminjaman' => 'peminjaman.index',
+            'permisi.persetujuan' => 'permisi.persetujuan',
+            'permisi.permohonan' => 'permisi.permohonan',
+            'ruangan.peminjaman' => 'ruangan.peminjaman',
+            'asmara.permohonan' => 'asmara.permohonan',
+            'bona.permohonan' => 'bona.permohonan',
+        ];
+
+        foreach ($candidates as $key => $route) {
+            if ($this->hasAccess($key)) {
+                return route($route);
+            }
+        }
+
+        return route('asmara.permohonan');
+    }
+
     /** Apakah user ini adalah Supervisor? */
     public function isSupervisor(): bool
     {
@@ -141,20 +215,19 @@ class User extends Authenticatable
     /** Apakah user ini dapat mengakses halaman Persetujuan Permisi? */
     public function canAccessPersetujuanPermisi(): bool
     {
-        return $this->isKepalaKantor() || $this->isKepalaSeksi() || $this->isSupervisor() || $this->isSubbagUmum() || $this->isAdministrator();
+        return $this->hasAccess('permisi.persetujuan');
     }
 
     /** Apakah user ini dapat mengakses halaman Permohonan Izin? */
     public function canAccessPermohonanPermisi(): bool
     {
-        // Kepala Kantor definitif tidak perlu membuat permohonan
-        return $this->jabatan !== 'Kepala Kantor';
+        return $this->hasAccess('permisi.permohonan');
     }
 
     /** Apakah user ini dapat mengakses halaman Sarana > Peminjaman? */
     public function canAccessPeminjaman(): bool
     {
-        return $this->jabatan !== 'Kepala Kantor';
+        return $this->hasAccess('kendaraan.peminjaman');
     }
 
     /** Apakah user ini adalah Pegawai (AR, Pelaksana, atau Kepala Seksi yang mengajukan)? */
@@ -166,27 +239,19 @@ class User extends Authenticatable
     /** Apakah user ini dapat mengakses dashboard admin? */
     public function canAccessAdminDashboard(): bool
     {
-        return $this->jabatan === 'Administrator' || $this->isKepalaKantor() || $this->isSubbagUmum();
+        return $this->hasAccess('kendaraan.dashboard');
     }
 
     /** Apakah user ini dapat melakukan manajemen/perubahan data pada armada? */
     public function canManageArmada(): bool
     {
-        if ($this->jabatan === 'Kepala Kantor') {
-            return false;
-        }
-        
-        return $this->jabatan === 'Administrator' || $this->isSubbagUmum();
+        return $this->hasAccess('kendaraan.armada.kelola');
     }
 
     /** Apakah user ini dapat melakukan aksi manajemen booking? */
     public function canManageBookings(): bool
     {
-        if ($this->jabatan === 'Kepala Kantor') {
-            return false;
-        }
-
-        return $this->jabatan === 'Administrator' || $this->isSubbagUmum();
+        return $this->hasAccess('kendaraan.dashboard.aksi');
     }
 
     // -----------------------------------------------------------------------
@@ -214,17 +279,17 @@ class User extends Authenticatable
 
     public function canAccessBonPermohonan(): bool
     {
-        return !$this->isKepalaKantor();
+        return $this->hasAccess('bona.permohonan');
     }
 
     public function canAccessBonKelola(): bool
     {
-        return $this->isSubbagUmum() || $this->isAdministrator();
+        return $this->hasAccess('bona.kelola');
     }
 
     public function canAccessBonMaster(): bool
     {
-        return $this->isSubbagUmum() || $this->isAdministrator();
+        return $this->hasAccess('bona.master');
     }
 
     // -----------------------------------------------------------------------
@@ -233,12 +298,12 @@ class User extends Authenticatable
 
     public function canAccessAsmaraPermohonan(): bool
     {
-        return true; // Semua pegawai bisa mengajukan surat keluar
+        return $this->hasAccess('asmara.permohonan');
     }
 
     public function canAccessAsmaraAdmin(): bool
     {
-        return $this->isAdministrator() || $this->isSubbagUmum() || $this->isPenjaminanKualitasData();
+        return $this->hasAccess('asmara.admin');
     }
 
     public function isPenjaminanKualitasData(): bool

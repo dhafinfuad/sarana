@@ -31,7 +31,7 @@ class Riwayat extends Component
 
     public function mount(): void
     {
-        if (! Auth::user()->canAccessPeminjaman()) {
+        if (! Auth::user()->hasAccess('ruangan.peminjaman')) {
             abort(403, 'Anda tidak memiliki hak akses ke halaman Riwayat Peminjaman Ruangan.');
         }
     }
